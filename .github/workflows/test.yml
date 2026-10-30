@@ -1,0 +1,28 @@
+name: tests
+
+# Unlike kenya-aid-flows (a live monthly feed), this project's source is a frozen Mendeley
+# archive -- there is nothing to refresh on a schedule. This workflow just runs the test
+# suite on every push and PR, hermetically (tmp_path/monkeypatch fixtures only, no live
+# download), so a bad change is caught before anyone tries to rebuild the pipeline by hand.
+# `workflow_dispatch` also lets the full pipeline be re-run from the Actions tab on demand.
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Run the tests (no live download)
+        run: python -m pytest -q

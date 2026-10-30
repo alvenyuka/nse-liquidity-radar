@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NSE Liquidity Radar | Alven Yuka</title>
+<meta name="description" content="68 NSE equities, 2013-2024: a DuckDB/SQL liquidity early-warning pipeline. Model PR-AUC 0.584 vs rule 0.517 on the honest transition subset.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23ffffff'/%3E%3Ccircle cx='32' cy='32' r='12' fill='%23d9f23a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600&f[]=cabinet-grotesk@400,500,700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#ffffff;--bg-2:#f6f7f3;--card:#ffffff;--fg:#1d222b;--fg-2:#323944;--muted:#4a5361;
+--border:rgba(29,34,43,.11);--border-strong:rgba(29,34,43,.20);--lime:#d9f23a;--lime-line:#9fbc00;
+--lime-wash:#f6fbd9;--on-lime:#1d222b;--accent:#3d5a00;--orange:#c2410c;--ring:#3d5a00;
+--card-shadow:0 1px 2px rgba(29,34,43,.04),0 8px 24px -14px rgba(29,34,43,.12);
+--font:"Cabinet Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+--font-display:"Clash Display","Cabinet Grotesk",system-ui,sans-serif;
+--font-mono:"JetBrains Mono",ui-monospace,"Cascadia Code",Consolas,monospace;color-scheme:light}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:4.5rem}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:1.0625rem;line-height:1.6;font-weight:500;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration-color:var(--border-strong);text-underline-offset:.16em}
+a:hover{text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--ring);outline-offset:3px;border-radius:4px}
+::selection{background:var(--lime);color:var(--on-lime)}
+h1,h2,h3{margin:0;font-weight:500;line-height:1.15;text-wrap:balance}
+p{margin:0}ul{margin:0;padding:0;list-style:none}
+strong{font-weight:700}
+.display{font-family:var(--font-display);font-weight:500;letter-spacing:-.02em}
+.mono{font-family:var(--font-mono);font-weight:400}
+.wrap{width:min(1180px,100% - 2rem);margin-inline:auto}
+.skip{position:absolute;left:1rem;top:-3rem;padding:.5rem .75rem;background:var(--lime);color:var(--on-lime);border-radius:.5rem;z-index:50}
+.skip:focus{top:1rem}
+.top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.top-row{display:flex;align-items:center;gap:1.5rem;height:4rem}
+.brand{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-display);font-weight:600;font-size:1.125rem;text-decoration:none}
+.brand .dot{width:.4rem;height:.4rem;border-radius:50%;background:var(--lime-line)}
+.nav{display:flex;gap:1.5rem;margin-inline:auto;font-size:.975rem;color:var(--fg-2)}
+.nav a{text-decoration:none}.nav a:hover{color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:.8rem 1.4rem;border-radius:999px;font-weight:600;font-size:1rem;text-decoration:none;border:1px solid transparent}
+.btn-sm{padding:.5rem 1.05rem;font-size:.925rem}
+.btn-outline{border-color:var(--border-strong);color:var(--fg);background:var(--card)}.btn-outline:hover{border-color:var(--fg)}
+.nav-cta{margin-left:auto;border-color:var(--orange);color:var(--orange)}.nav-cta:hover{background:rgba(194,65,12,.08);border-color:var(--orange);color:var(--orange)}
+.pill{display:inline-flex;align-items:center;gap:.55rem;padding:.4rem .9rem;border-radius:999px;border:1px solid var(--border-strong);background:var(--card);font-family:var(--font-mono);font-size:.8125rem;color:var(--fg-2);max-width:100%}
+.hero{border-bottom:1px solid var(--border)}
+.hero-inner{padding-block:clamp(3rem,7vw,5rem) clamp(2.5rem,5vw,4rem)}
+.hero .pill{margin-bottom:1.5rem}
+.hero h1{font-size:clamp(2.25rem,1.6rem + 2.4vw,3rem);line-height:1.05;letter-spacing:-.03em;max-width:22ch}
+.lede{margin-top:1.25rem;color:var(--fg-2);font-size:clamp(1.0625rem,.95rem + .4vw,1.25rem);line-height:1.55;max-width:62ch}
+.actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.25rem;margin-top:2.25rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+.facts li{display:grid;gap:.35rem;align-content:start}
+.stat-num{font-size:2.1rem;line-height:1;letter-spacing:-.02em;justify-self:start;background:linear-gradient(transparent 58%,var(--lime) 58%,var(--lime) 92%,transparent 92%);padding-inline:.06em}
+.stat-label{font-size:.9rem;color:var(--muted);line-height:1.35}
+.section{padding-block:clamp(3rem,6vw,5rem)}
+.section:nth-of-type(even){background:var(--bg-2)}
+.section+.section{border-top:1px solid var(--border)}
+.section-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1.25rem 3rem;align-items:end;margin-bottom:clamp(1.5rem,3vw,2.5rem)}
+.section-head .pill{margin-bottom:1rem}
+.section-head h2{font-size:clamp(1.7rem,1.2rem + 2vw,2.6rem);letter-spacing:-.02em;line-height:1.05}
+.section-head>p{color:var(--muted);max-width:56ch}
+.card{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:clamp(1.1rem,3vw,1.75rem);box-shadow:var(--card-shadow)}
+.callout{background:var(--lime-wash);border:1px solid var(--lime-line);border-radius:1rem;padding:clamp(1.1rem,3vw,1.5rem);margin-top:1.25rem}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem}
+.prose p+p{margin-top:.9rem}
+.prose{color:var(--fg-2);max-width:70ch}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:30rem}
+th,td{padding:.55rem .7rem;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+th{font-family:var(--font-mono);font-weight:400;font-size:.8rem;color:var(--muted)}
+caption{text-align:left;font-family:var(--font-mono);font-size:.8rem;color:var(--muted);padding-bottom:.6rem}
+.limits li{padding:.55rem 0;border-bottom:1px solid var(--border);color:var(--fg-2)}
+.foot{padding-block:2rem;font-size:.8rem;color:var(--muted);display:grid;gap:.4rem;border-top:1px solid var(--border)}
+@media (max-width:860px){.section-head{grid-template-columns:minmax(0,1fr)}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:minmax(0,1fr)}.nav{display:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#results">Skip to results</a>
+<div class="top"><div class="wrap top-row">
+<a class="brand" href="https://alven-yuka.vercel.app"><span class="dot"></span>Alven Yuka</a>
+<nav class="nav" aria-label="Sections"><a href="#results">Results</a><a href="#coverage">Data</a><a href="#watchlist">Watchlist</a><a href="#method">Method</a><a href="#limits">Limits</a></nav>
+<a class="btn btn-sm btn-outline nav-cta" href="https://github.com/alvenyuka/nse-liquidity-radar">Repository</a>
+</div></div>
+<main>
+<header class="hero"><div class="wrap hero-inner">
+<span class="pill mono">SQL / Data Engineering + Applied ML &middot; DuckDB, plain SQL, scikit-learn</span>
+<h1 class="display">Which NSE stocks are sliding into illiquidity, and which signal actually says so</h1>
+<p class="lede">A reproducible pipeline on 68 Nairobi Securities Exchange equities, 2013 to October 2024, real daily price and volume data. Built to answer one question an investment desk actually asks: can a position in this name be exited without moving the market in the next week — and does a model beat a simple rule at predicting when that stops being true?</p>
+<div class="actions"><a class="btn btn-sm btn-outline" href="https://github.com/alvenyuka/nse-liquidity-radar">View the pipeline on GitHub</a></div>
+
+<ul class="facts">
+<li><span class="stat-num display">68</span><span class="stat-label">NSE-listed equities, 2013-2024</span></li>
+<li><span class="stat-num display">25.1%</span><span class="stat-label">of all stock-sessions were untraded</span></li>
+<li><span class="stat-num display">11.3%</span><span class="stat-label">of currently-liquid names turn illiquid within 5 sessions</span></li>
+<li><span class="stat-num display">0.584</span><span class="stat-label">model PR-AUC on that harder subset, vs 0.517 for a fixed rule</span></li>
+</ul>
+</div></header>
+<section class="section" id="results">
+<div class="wrap">
+<div class="section-head"><div><span class="pill mono">Results</span><h2 class="display">The model beats the rule every year — modestly</h2></div><p>Not one lucky split: the same model, refit on an expanding window, outperforms the fixed rule's ranking in every one of 9 overlapping test years (a stability check across years of the same pair of scorers, not nine independent replications).</p></div>
+<div class="card"><div class="table-wrap"><table><caption>PR-AUC and base rate, test period 2023-2024 (5-session embargo before the split)</caption><thead><tr><th scope="col">Method</th><th scope="col">Base rate (full)</th><th scope="col">PR-AUC (full)</th><th scope="col">Base rate (transition)</th><th scope="col">PR-AUC (transition)</th></tr></thead><tbody>
+<tr><td>Persistence (today&#x27;s regime = tomorrow&#x27;s)</td><td>37.4%</td><td>72.127%</td><td>11.6%</td><td>11.599%</td></tr>
+<tr><td>Rule: untraded ≥50% of last 20 sessions</td><td></td><td>89.775%</td><td></td><td>51.741%</td></tr>
+<tr><td>Logistic regression (4 SQL-built features)</td><td></td><td>91.450%</td><td></td><td>58.371%</td></tr>
+</tbody></table></div></div>
+<div class="callout prose"><p><strong>Why "full population" overstates it.</strong> Most of the illiquidity in 40.8% of all rows is a stock that was already illiquid staying that way — persistence alone gets 72.127% PR-AUC for free. The question worth answering is the harder one: among the 110,765 stock-sessions that were NOT already illiquid, which ones turn within 5 sessions? There, persistence cannot even be defined usefully (it predicts nothing, since by definition these rows are not currently illiquid), the fixed rule gets 0.517, and the model gets 0.584 — a real, modest improvement, not a free one.</p><p><strong>Where the model actually adds value.</strong> At the rule's own flag count (25 flags), the model's top-ranked rows are the exact same as the rule's — precision 84%, recall 1.1%, identical. The model's higher PR-AUC comes from ranking better below that cutoff, not from beating the rule at the operating point a desk would actually use today. A lower, better-chosen cutoff is the natural next question, not answered here.</p></div><div class="card" style="margin-top:1.25rem"><div class="table-wrap"><table><caption>Walk-forward by year, transition population only, expanding training window</caption><thead><tr><th scope="col">Test year</th><th scope="col">Rows scored</th><th scope="col">Base rate</th><th scope="col">Persistence PR-AUC</th><th scope="col">Rule PR-AUC</th><th scope="col">Model PR-AUC</th></tr></thead><tbody>
+<tr><td>2016</td><td>9,656</td><td>12.0%</td><td>0.120</td><td>0.478</td><td>0.537</td></tr>
+<tr><td>2017</td><td>9,543</td><td>11.9%</td><td>0.119</td><td>0.395</td><td>0.481</td></tr>
+<tr><td>2018</td><td>9,864</td><td>13.1%</td><td>0.131</td><td>0.486</td><td>0.552</td></tr>
+<tr><td>2019</td><td>8,674</td><td>13.9%</td><td>0.139</td><td>0.473</td><td>0.551</td></tr>
+<tr><td>2020</td><td>8,226</td><td>12.8%</td><td>0.128</td><td>0.482</td><td>0.554</td></tr>
+<tr><td>2021</td><td>8,979</td><td>11.4%</td><td>0.114</td><td>0.549</td><td>0.625</td></tr>
+<tr><td>2022</td><td>8,619</td><td>12.2%</td><td>0.122</td><td>0.457</td><td>0.521</td></tr>
+<tr><td>2023</td><td>8,518</td><td>12.3%</td><td>0.123</td><td>0.476</td><td>0.545</td></tr>
+<tr><td>2024</td><td>7,363</td><td>10.8%</td><td>0.108</td><td>0.574</td><td>0.632</td></tr>
+</tbody></table></div></div>
+</div>
+</section>
+<section class="section" id="coverage">
+<div class="wrap">
+<div class="section-head"><div><span class="pill mono">Data engineering</span><h2 class="display">Why a dense per-stock session grid exists</h2></div><p>A real frontier-market data-quality finding, caught before it reached a model.</p></div>
+
+<div class="grid2">
+<div class="card prose"><p><strong>187,792</strong> stock-session rows in the dense grid. <strong>1,749</strong> of those are sessions the source simply has no row for at all — not a zero, an absence. Confirming this before writing any rolling window mattered: a window function over the raw sparse table would have silently stretched "the next 5 sessions" across however many calendar gaps happen to fall in the way.</p><p>A further <strong>45,392</strong> rows are present but explicitly marked not traded (the source writes "-", never a literal 0). Both cases mean the same thing for this project: untraded.</p></div>
+<div class="table-wrap"><table><caption>The 5 stocks with the most missing sessions inside their own listed life</caption><thead><tr><th scope="col">Stock</th><th scope="col">First seen</th><th scope="col">Last seen</th><th scope="col">Sessions expected</th><th scope="col">Sessions recorded</th><th scope="col">Sessions missing</th></tr></thead><tbody>
+<tr><td>MSC</td><td>2013-01-02</td><td>2024-10-31</td><td>2,941</td><td>2,389</td><td>552</td></tr>
+<tr><td>GLD</td><td>2015-05-09</td><td>2024-10-31</td><td>2,355</td><td>1,885</td><td>470</td></tr>
+<tr><td>DCON</td><td>2015-05-09</td><td>2024-10-31</td><td>2,355</td><td>2,047</td><td>308</td></tr>
+<tr><td>NBV</td><td>2015-05-09</td><td>2024-10-31</td><td>2,355</td><td>2,076</td><td>279</td></tr>
+<tr><td>FAHR</td><td>2015-05-09</td><td>2022-05-31</td><td>1,758</td><td>1,619</td><td>139</td></tr>
+</tbody></table></div>
+</div>
+</div>
+</section>
+<section class="section" id="watchlist">
+<div class="wrap">
+<div class="section-head"><div><span class="pill mono">The watchlist</span><h2 class="display">What the signal said on the last session</h2></div><p>Not a live feed — the Mendeley archive ends 31 Oct 2024 — this is the backtest's own snapshot, read the same way a live version would be.</p></div>
+<div class="card"><div class="table-wrap"><table><caption>Most recent reading per stock, ranked by last-20-session untraded share (as of 2024-10-31)</caption><thead><tr><th scope="col">Stock</th><th scope="col">Sector</th><th scope="col">Untraded share (20d)</th><th scope="col">Illiquid now</th><th scope="col">Days to exit KES 1M*</th></tr></thead><tbody>
+<tr><td>DCON</td><td>Commercial and Services</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>NBK</td><td>Banking</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>HBE</td><td>Commercial and Services</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>KENO</td><td>Energy and Petroleum</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>KPLC-P4</td><td>Construction and Allied</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>KPLC-P7</td><td>Construction and Allied</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>KQ</td><td>Commercial and Services</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>KURV</td><td>Investment</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>LAPR</td><td>Telecommunication</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>LIMT</td><td>Agricultural</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>MSC</td><td>Manufacturing and Allied</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>ARM</td><td>Construction and Allied</td><td>100.0%</td><td>yes</td><td>—</td></tr>
+<tr><td>GLD</td><td>Telecommunication</td><td>95.0%</td><td>yes</td><td>150.2</td></tr>
+<tr><td>KUKZ</td><td>Agricultural</td><td>70.0%</td><td>yes</td><td>7.8</td></tr>
+<tr><td>KAPC</td><td>Agricultural</td><td>70.0%</td><td>yes</td><td>28.8</td></tr>
+</tbody></table></div><p class="prose" style="margin-top:.9rem;font-size:.85rem">*Illustrative: position size divided by 20% of the stock's own 20-day average KES value traded. "—" means the stock traded nothing in the last 20 sessions, so no position size could be exited through the market at all right now.</p></div>
+</div>
+</section>
+<section class="section" id="method">
+<div class="wrap">
+<div class="section-head"><div><span class="pill mono">How it is built</span><h2 class="display">One folder per stage, runnable end to end</h2></div><p>The same shape as this portfolio's other data pipelines: small scripts, plain loops, real checks.</p></div>
+
+<div class="grid2">
+<div class="card prose"><p><strong>1-2. Ingest and clean.</strong> Four public Mendeley Data archives (one author, one schema, CC BY 4.0), downloaded with no login. Real schema drift handled: column names and even the date format change between the 2013-2021 files and the 2022-2024 files.</p><p><strong>3. Warehouse.</strong> DuckDB, loaded from cleaned parquet.</p><p><strong>4. SQL models.</strong> A dense per-stock session grid first, then window-function features (ROWS BETWEEN, never a date range), then the forward and trailing labels, then the analysis mart. Plain numbered .sql files, no dbt.</p></div>
+<div class="card prose"><p><strong>5. Checks.</strong> 8 SQL checks that must return zero rows: no duplicate sessions, the grid never leaves a stock's own listed life, both labels are NULL in exactly the rows they should be, no negative volume, dates in range, every price code has a sector.</p><p><strong>6-7. Baseline and model.</strong> A naive persistence guess and a fixed rule, then a logistic regression, compared like-for-like by matching flag counts, not by a fixed probability cutoff that a rare label would make meaningless.</p><p><strong>8-10. Report, figures, site.</strong> Every number above traces to <code>outputs/results.json</code>.</p></div>
+</div>
+</div>
+</section>
+<section class="section" id="limits">
+<div class="wrap">
+<div class="section-head"><div><span class="pill mono">Limits</span><h2 class="display">Read before citing a number from this page</h2></div><p></p></div>
+<div class="card"><ul class="limits"><li>This is a frozen historical archive (last update November 2024), not a live feed. There is deliberately no scheduled refresh — a live version would need a paid or scraped real-time NSE feed, which this project does not have.</li><li>Indices (codes starting with ‘^’, e.g. the NSE All-Share Index) are excluded from the universe: an index has no comparable single-instrument trading volume.</li><li>Returns are computed from the raw close, which is echoed unchanged on an untraded day (the source repeats the last traded price rather than leaving it blank). That makes 20-day return volatility understate true volatility on the thinnest names — a day with no trade is not really a zero-return day, it is a missing one.</li><li>volume_zscore_60d is undefined (not computed) for a stock with zero trading volume for 60 straight sessions — a real state for several names in this market, not a bug.</li><li>The logistic regression&#x27;s standardised coefficients describe association within this sample, not a causal claim about what drives illiquidity.</li><li>Sector is shown for grouping only; it is never a model input, because it is static and would mostly just memorise which names are already known to be thin.</li><li>The ‘days to exit’ column on the watchlist is an illustrative execution rule of thumb (20% daily participation), not a market-impact model.</li></ul></div>
+</div>
+</section>
+</main>
+
+<footer class="foot wrap mono"><span>Alven Yuka &middot; <a href="https://alven-yuka.vercel.app">alven-yuka.vercel.app</a> &middot; <a href="https://github.com/alvenyuka/nse-liquidity-radar">https://github.com/alvenyuka/nse-liquidity-radar</a></span>
+<span>Figures read from outputs/results.json, built by site/build_page.py. Commit 356ff70.</span>
+<span>Barack Wanjawa, University of Nairobi, via Mendeley Data, CC BY 4.0.</span></footer>
+</body>
+</html>

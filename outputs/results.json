@@ -1,0 +1,1579 @@
+{
+  "licence": "CC BY 4.0",
+  "attribution": "Barack Wanjawa, University of Nairobi, via Mendeley Data",
+  "datasets": {
+    "73rb78pmzw": {
+      "years": "2013-2020",
+      "version": 2,
+      "source_url": "https://data.mendeley.com/public-api/zip/73rb78pmzw/download/2",
+      "zip_sha256": "1438cf846772d5f0682f60c07cf16648f665441d6ddb17e000dc51620a60dfd3",
+      "zip_bytes": 1844462,
+      "files": [
+        {
+          "file": "NSE_data_all_stocks_2013.csv",
+          "bytes": 1236310,
+          "rows_excluding_header": 14889
+        },
+        {
+          "file": "NSE_data_all_stocks_2014.csv",
+          "bytes": 1318123,
+          "rows_excluding_header": 15696
+        },
+        {
+          "file": "NSE_data_all_stocks_2015.csv",
+          "bytes": 1374934,
+          "rows_excluding_header": 16386
+        },
+        {
+          "file": "NSE_data_all_stocks_2016.csv",
+          "bytes": 1402051,
+          "rows_excluding_header": 16800
+        },
+        {
+          "file": "NSE_data_all_stocks_2017.csv",
+          "bytes": 1413323,
+          "rows_excluding_header": 16981
+        },
+        {
+          "file": "NSE_data_all_stocks_2018.csv",
+          "bytes": 1477930,
+          "rows_excluding_header": 17651
+        },
+        {
+          "file": "NSE_data_all_stocks_2019.csv",
+          "bytes": 1532614,
+          "rows_excluding_header": 18147
+        },
+        {
+          "file": "NSE_data_all_stocks_2020.csv",
+          "bytes": 1481116,
+          "rows_excluding_header": 17892
+        },
+        {
+          "file": "NSE_data_stock_market_sectors_2013.csv",
+          "bytes": 2767,
+          "rows_excluding_header": 64
+        },
+        {
+          "file": "NSE_data_stock_market_sectors_2020.csv",
+          "bytes": 3212,
+          "rows_excluding_header": 73
+        }
+      ]
+    },
+    "97hkwn5y3x": {
+      "years": "2021",
+      "version": 4,
+      "source_url": "https://data.mendeley.com/public-api/zip/97hkwn5y3x/download/4",
+      "zip_sha256": "9f3a07da441305a2f663fb79955ad5b6d06b76c0cc7692db765e3467de33bf3a",
+      "zip_bytes": 241408,
+      "files": [
+        {
+          "file": "NSE_data_all_stocks_2021_upto_31dec2021.csv",
+          "bytes": 1568005,
+          "rows_excluding_header": 17746
+        },
+        {
+          "file": "NSE_data_stock_market_sectors_as_at_31dec2021.csv",
+          "bytes": 3207,
+          "rows_excluding_header": 71
+        }
+      ]
+    },
+    "jmcdmnyh2s": {
+      "years": "2022",
+      "version": 2,
+      "source_url": "https://data.mendeley.com/public-api/zip/jmcdmnyh2s/download/2",
+      "zip_sha256": "1872807cf75dfdbd4f7542a0eadd1a0c39b8bf93659ce4017d25a604a5de4631",
+      "zip_bytes": 205787,
+      "files": [
+        {
+          "file": "NSE_data_all_stocks_2022.csv",
+          "bytes": 1406889,
+          "rows_excluding_header": 16806
+        },
+        {
+          "file": "NSE_data_stock_market_sectors_2022.csv",
+          "bytes": 3250,
+          "rows_excluding_header": 71
+        }
+      ]
+    },
+    "ss5pfw8xnk": {
+      "years": "2023-2024",
+      "version": 1,
+      "source_url": "https://data.mendeley.com/public-api/zip/ss5pfw8xnk/download/1",
+      "zip_sha256": "b6aeba73b9886de59a7c4cfc2c4563e69cc45886faaa6ee9729c18f7d707e0b1",
+      "zip_bytes": 423988,
+      "files": [
+        {
+          "file": "NSE_data_all_stocks_2023.csv",
+          "bytes": 1638191,
+          "rows_excluding_header": 17274
+        },
+        {
+          "file": "NSE_data_all_stocks_2024_jan_to_oct.csv",
+          "bytes": 1450925,
+          "rows_excluding_header": 15258
+        },
+        {
+          "file": "NSE_data_stock_market_sectors_2023_2024.csv",
+          "bytes": 3425,
+          "rows_excluding_header": 75
+        }
+      ]
+    }
+  },
+  "checks_run": 8,
+  "cleaning_rules": [
+    {
+      "table": "prices",
+      "rule": "concatenate_all_years",
+      "rows_in": 0,
+      "rows_out": 201526,
+      "rows_removed": -201526,
+      "note": "12 source files"
+    },
+    {
+      "table": "prices",
+      "rule": "parse_columns",
+      "rows_in": 201526,
+      "rows_out": 201526,
+      "rows_removed": 0,
+      "note": "dates and numbers parsed, no rows dropped yet"
+    },
+    {
+      "table": "prices",
+      "rule": "drop_unusable_rows",
+      "rows_in": 201526,
+      "rows_out": 201524,
+      "rows_removed": 2,
+      "note": "2 rows had no code or no date"
+    },
+    {
+      "table": "prices",
+      "rule": "check_reported_change_matches_computed",
+      "rows_in": 201524,
+      "rows_out": 201524,
+      "rows_removed": 0,
+      "note": "0 of 126054 comparable rows differ by more than 0.5 points after allowing for Change%'s unsigned magnitude (kept either way)"
+    },
+    {
+      "table": "prices",
+      "rule": "drop_index_codes",
+      "rows_in": 201524,
+      "rows_out": 186108,
+      "rows_removed": 15416,
+      "note": "removed ['^FNK15', '^FNK25', '^N10I', '^N20I', '^N25I', '^NASI', '^NBDI', '^ZKEQTK', '^ZKEQTU']"
+    },
+    {
+      "table": "prices",
+      "rule": "drop_duplicate_stock_dates",
+      "rows_in": 186108,
+      "rows_out": 186044,
+      "rows_removed": 64,
+      "note": "64 duplicate (stock_code, trade_date) rows removed, keeping the matching-year file"
+    },
+    {
+      "table": "sectors",
+      "rule": "concatenate_all_years",
+      "rows_in": 0,
+      "rows_out": 354,
+      "rows_removed": -354,
+      "note": "5 source files"
+    },
+    {
+      "table": "sectors",
+      "rule": "drop_malformed_rows",
+      "rows_in": 354,
+      "rows_out": 347,
+      "rows_removed": 7,
+      "note": "7 rows removed; non-blank dropped codes: ['ENERGY AND PETROLEUM', 'EXCHANGE TRADED FUNDS', 'REAL ESTATE INVESTMENT TRUSTS']"
+    },
+    {
+      "table": "sectors",
+      "rule": "drop_index_codes",
+      "rows_in": 347,
+      "rows_out": 318,
+      "rows_removed": 29,
+      "note": "removed ['^FNK15', '^FNK25', '^N10I', '^N20I', '^N25I', '^NASI', '^ZKEQTK', '^ZKEQTU']"
+    },
+    {
+      "table": "sectors",
+      "rule": "count_sector_changes",
+      "rows_in": 318,
+      "rows_out": 318,
+      "rows_removed": 0,
+      "note": "8 of 68 codes were filed under more than one sector across the years (kept as most recent)"
+    },
+    {
+      "table": "sectors",
+      "rule": "keep_most_recent_per_code",
+      "rows_in": 318,
+      "rows_out": 68,
+      "rows_removed": 250,
+      "note": "68 distinct stock codes across all years"
+    }
+  ],
+  "universe": {
+    "stock_codes": 68,
+    "first_date": "2013-01-02T00:00:00.000",
+    "last_date": "2024-10-31T00:00:00.000",
+    "total_sessions": 2941
+  },
+  "sectors": [
+    {
+      "sector": "Commercial and Services",
+      "stock_codes": 13
+    },
+    {
+      "sector": "Banking",
+      "stock_codes": 12
+    },
+    {
+      "sector": "Construction and Allied",
+      "stock_codes": 11
+    },
+    {
+      "sector": "Manufacturing and Allied",
+      "stock_codes": 8
+    },
+    {
+      "sector": "Insurance",
+      "stock_codes": 6
+    },
+    {
+      "sector": "Agricultural",
+      "stock_codes": 6
+    },
+    {
+      "sector": "Investment",
+      "stock_codes": 5
+    },
+    {
+      "sector": "Telecommunication",
+      "stock_codes": 3
+    },
+    {
+      "sector": "Real Estate Investment Trusts",
+      "stock_codes": 1
+    },
+    {
+      "sector": "Energy and Petroleum",
+      "stock_codes": 1
+    },
+    {
+      "sector": "Automobiles and Accessories",
+      "stock_codes": 1
+    },
+    {
+      "sector": "Investment Services",
+      "stock_codes": 1
+    }
+  ],
+  "coverage": {
+    "grid_rows": 187792,
+    "rows_with_a_volume_figure": 140652.0,
+    "rows_absent_from_source_entirely": 1749.0,
+    "rows_present_but_marked_not_traded": 45392.0,
+    "overall_untraded_share": 0.251022
+  },
+  "most_incomplete_stocks": [
+    {
+      "stock_code": "MSC",
+      "first_date": "2013-01-02T00:00:00.000",
+      "last_date": "2024-10-31T00:00:00.000",
+      "sessions_in_bounds": 2941,
+      "sessions_actually_recorded": 2389,
+      "sessions_missing": 552
+    },
+    {
+      "stock_code": "GLD",
+      "first_date": "2015-05-09T00:00:00.000",
+      "last_date": "2024-10-31T00:00:00.000",
+      "sessions_in_bounds": 2355,
+      "sessions_actually_recorded": 1885,
+      "sessions_missing": 470
+    },
+    {
+      "stock_code": "DCON",
+      "first_date": "2015-05-09T00:00:00.000",
+      "last_date": "2024-10-31T00:00:00.000",
+      "sessions_in_bounds": 2355,
+      "sessions_actually_recorded": 2047,
+      "sessions_missing": 308
+    },
+    {
+      "stock_code": "NBV",
+      "first_date": "2015-05-09T00:00:00.000",
+      "last_date": "2024-10-31T00:00:00.000",
+      "sessions_in_bounds": 2355,
+      "sessions_actually_recorded": 2076,
+      "sessions_missing": 279
+    },
+    {
+      "stock_code": "FAHR",
+      "first_date": "2015-05-09T00:00:00.000",
+      "last_date": "2022-05-31T00:00:00.000",
+      "sessions_in_bounds": 1758,
+      "sessions_actually_recorded": 1619,
+      "sessions_missing": 139
+    }
+  ],
+  "label_distribution": {
+    "rows_with_a_label": 187452,
+    "base_rate_full": 0.408206,
+    "base_rate_transition": 0.112671,
+    "currently_liquid_rows": 110765.0
+  },
+  "days_to_liquidate_assumptions": {
+    "participation_rate": 0.2,
+    "illustrative_positions_kes": [
+      1000000,
+      5000000,
+      10000000
+    ],
+    "method": "position_kes / (participation_rate * 20-day average KES value traded)"
+  },
+  "watchlist": [
+    {
+      "stock_code": "DCON",
+      "stock_name": "Deacons (East Africa) Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 0.45,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "NBK",
+      "stock_name": "National Bank of Kenya Ltd",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 4.12,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "HBE",
+      "stock_name": "Homeboyz Entertainment Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 4.66,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "KENO",
+      "stock_name": "KenolKobil Ltd",
+      "sector": "Energy and Petroleum",
+      "trade_date": "2019-10-11T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 22.0,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "KPLC-P4",
+      "stock_name": "KPLC-P4",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 4.0,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "KPLC-P7",
+      "stock_name": "KPLC-P7",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 6.0,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "KQ",
+      "stock_name": "Kenya Airways Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 3.83,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "KURV",
+      "stock_name": "Kurwitu Ventures Ltd",
+      "sector": "Investment",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 1500.0,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "LAPR",
+      "stock_name": "Laptrust Imara Income-REIT",
+      "sector": "Telecommunication",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 20.0,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "LIMT",
+      "stock_name": "Limuru Tea Plc",
+      "sector": "Agricultural",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 365.0,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "MSC",
+      "stock_name": "Mumias Sugar Company Ltd",
+      "sector": "Manufacturing and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 0.27,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "ARM",
+      "stock_name": "ARM Cement Plc",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 0.0,
+      "close_price": 5.55,
+      "zeros_share_20d": 1.0,
+      "volume_zscore_60d": null,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 0.0,
+      "days_to_liquidate_1m": null,
+      "days_to_liquidate_5m": null,
+      "days_to_liquidate_10m": null
+    },
+    {
+      "stock_code": "GLD",
+      "stock_name": "ABSA NewGold ETF",
+      "sector": "Telecommunication",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 10.0,
+      "close_price": 3330.0,
+      "zeros_share_20d": 0.95,
+      "volume_zscore_60d": -0.213861,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 33300.0,
+      "days_to_liquidate_1m": 150.15015,
+      "days_to_liquidate_5m": 750.750751,
+      "days_to_liquidate_10m": 1501.501502
+    },
+    {
+      "stock_code": "KUKZ",
+      "stock_name": "Kakuzi Plc",
+      "sector": "Agricultural",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 1475.0,
+      "close_price": 433.75,
+      "zeros_share_20d": 0.7,
+      "volume_zscore_60d": -0.147311,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 639781.25,
+      "days_to_liquidate_1m": 7.815171,
+      "days_to_liquidate_5m": 39.075856,
+      "days_to_liquidate_10m": 78.151712
+    },
+    {
+      "stock_code": "KAPC",
+      "stock_name": "Kapchorua Tea Kenya Plc",
+      "sector": "Agricultural",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 705.0,
+      "close_price": 246.0,
+      "zeros_share_20d": 0.7,
+      "volume_zscore_60d": -0.221814,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 173430.0,
+      "days_to_liquidate_1m": 28.830076,
+      "days_to_liquidate_5m": 144.150378,
+      "days_to_liquidate_10m": 288.300755
+    },
+    {
+      "stock_code": "EGAD",
+      "stock_name": "Eaagads Ltd",
+      "sector": "Agricultural",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 395.0,
+      "close_price": 12.0,
+      "zeros_share_20d": 0.6,
+      "volume_zscore_60d": 2.615207,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 4740.0,
+      "days_to_liquidate_1m": 1054.852321,
+      "days_to_liquidate_5m": 5274.261603,
+      "days_to_liquidate_10m": 10548.523207
+    },
+    {
+      "stock_code": "XPRS",
+      "stock_name": "Express Kenya Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 340.0,
+      "close_price": 3.5,
+      "zeros_share_20d": 0.45,
+      "volume_zscore_60d": -0.485205,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 1190.0,
+      "days_to_liquidate_1m": 4201.680672,
+      "days_to_liquidate_5m": 21008.403361,
+      "days_to_liquidate_10m": 42016.806723
+    },
+    {
+      "stock_code": "BKG",
+      "stock_name": "BK Group Plc",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 415.0,
+      "close_price": 33.1,
+      "zeros_share_20d": 0.35,
+      "volume_zscore_60d": -0.217701,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 13736.5,
+      "days_to_liquidate_1m": 363.993739,
+      "days_to_liquidate_5m": 1819.968697,
+      "days_to_liquidate_10m": 3639.937393
+    },
+    {
+      "stock_code": "BOC",
+      "stock_name": "BOC Kenya Plc",
+      "sector": "Manufacturing and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 1000.0,
+      "close_price": 80.0,
+      "zeros_share_20d": 0.3,
+      "volume_zscore_60d": -0.148857,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 80000.0,
+      "days_to_liquidate_1m": 62.5,
+      "days_to_liquidate_5m": 312.5,
+      "days_to_liquidate_10m": 625.0
+    },
+    {
+      "stock_code": "OCH",
+      "stock_name": "Olympia Capital Holdings Ltd",
+      "sector": "Investment",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 1775.0,
+      "close_price": 3.0,
+      "zeros_share_20d": 0.3,
+      "volume_zscore_60d": -0.17691,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 5325.0,
+      "days_to_liquidate_1m": 938.967136,
+      "days_to_liquidate_5m": 4694.835681,
+      "days_to_liquidate_10m": 9389.671362
+    },
+    {
+      "stock_code": "CGEN",
+      "stock_name": "Car and General (K) Ltd",
+      "sector": "Automobiles and Accessories",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 1160.0,
+      "close_price": 23.0,
+      "zeros_share_20d": 0.25,
+      "volume_zscore_60d": 0.288737,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 26680.0,
+      "days_to_liquidate_1m": 187.406297,
+      "days_to_liquidate_5m": 937.031484,
+      "days_to_liquidate_10m": 1874.062969
+    },
+    {
+      "stock_code": "LKL",
+      "stock_name": "Longhorn Publishers Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 1755.0,
+      "close_price": 2.5,
+      "zeros_share_20d": 0.25,
+      "volume_zscore_60d": -0.417299,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 4387.5,
+      "days_to_liquidate_1m": 1139.60114,
+      "days_to_liquidate_5m": 5698.005698,
+      "days_to_liquidate_10m": 11396.011396
+    },
+    {
+      "stock_code": "ORCH",
+      "stock_name": "Kenya Orchards Ltd",
+      "sector": "Manufacturing and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 280.0,
+      "close_price": 70.0,
+      "zeros_share_20d": 0.25,
+      "volume_zscore_60d": -0.129674,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 19600.0,
+      "days_to_liquidate_1m": 255.102041,
+      "days_to_liquidate_5m": 1275.510204,
+      "days_to_liquidate_10m": 2551.020408
+    },
+    {
+      "stock_code": "CRWN",
+      "stock_name": "Crown Paints Kenya Plc",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 580.0,
+      "close_price": 34.65,
+      "zeros_share_20d": 0.25,
+      "volume_zscore_60d": -0.635577,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 20097.0,
+      "days_to_liquidate_1m": 248.793352,
+      "days_to_liquidate_5m": 1243.966761,
+      "days_to_liquidate_10m": 2487.933522
+    },
+    {
+      "stock_code": "UNGA",
+      "stock_name": "Unga Group Ltd",
+      "sector": "Manufacturing and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 1895.0,
+      "close_price": 15.1,
+      "zeros_share_20d": 0.25,
+      "volume_zscore_60d": 0.569192,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 28614.5,
+      "days_to_liquidate_1m": 174.736585,
+      "days_to_liquidate_5m": 873.682923,
+      "days_to_liquidate_10m": 1747.365846
+    },
+    {
+      "stock_code": "SLAM",
+      "stock_name": "Sanlam Kenya Plc",
+      "sector": "Insurance",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 10260.0,
+      "close_price": 5.92,
+      "zeros_share_20d": 0.2,
+      "volume_zscore_60d": -0.135269,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 60739.2,
+      "days_to_liquidate_1m": 82.319161,
+      "days_to_liquidate_5m": 411.595806,
+      "days_to_liquidate_10m": 823.191613
+    },
+    {
+      "stock_code": "WTK",
+      "stock_name": "Williamson Tea Kenya Plc",
+      "sector": "Agricultural",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 1885.0,
+      "close_price": 245.0,
+      "zeros_share_20d": 0.2,
+      "volume_zscore_60d": -0.465094,
+      "trailing_illiquid_5": 1,
+      "avg_kes_value_traded_20d": 461825.0,
+      "days_to_liquidate_1m": 10.826612,
+      "days_to_liquidate_5m": 54.133059,
+      "days_to_liquidate_10m": 108.266118
+    },
+    {
+      "stock_code": "LBTY",
+      "stock_name": "Liberty Kenya Holdings Ltd",
+      "sector": "Insurance",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 6250.0,
+      "close_price": 7.5,
+      "zeros_share_20d": 0.15,
+      "volume_zscore_60d": 0.049678,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 46875.0,
+      "days_to_liquidate_1m": 106.666667,
+      "days_to_liquidate_5m": 533.333333,
+      "days_to_liquidate_10m": 1066.666667
+    },
+    {
+      "stock_code": "NBV",
+      "stock_name": "Nairobi Business Ventures Ltd",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 15850.0,
+      "close_price": 2.15,
+      "zeros_share_20d": 0.05,
+      "volume_zscore_60d": -0.233265,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 34077.5,
+      "days_to_liquidate_1m": 146.724378,
+      "days_to_liquidate_5m": 733.621891,
+      "days_to_liquidate_10m": 1467.243783
+    },
+    {
+      "stock_code": "JUB",
+      "stock_name": "Jubilee Holdings Ltd",
+      "sector": "Insurance",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 9745.0,
+      "close_price": 170.0,
+      "zeros_share_20d": 0.05,
+      "volume_zscore_60d": -0.49191,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 1656650.0,
+      "days_to_liquidate_1m": 3.018139,
+      "days_to_liquidate_5m": 15.090695,
+      "days_to_liquidate_10m": 30.18139
+    },
+    {
+      "stock_code": "EVRD",
+      "stock_name": "Eveready East Africa Ltd",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 14410.0,
+      "close_price": 1.08,
+      "zeros_share_20d": 0.05,
+      "volume_zscore_60d": -0.618432,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 15562.8,
+      "days_to_liquidate_1m": 321.278947,
+      "days_to_liquidate_5m": 1606.394736,
+      "days_to_liquidate_10m": 3212.789472
+    },
+    {
+      "stock_code": "SMER",
+      "stock_name": "Sameer Africa Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 12490.0,
+      "close_price": 2.18,
+      "zeros_share_20d": 0.05,
+      "volume_zscore_60d": 1.226527,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 27228.2,
+      "days_to_liquidate_1m": 183.633145,
+      "days_to_liquidate_5m": 918.165725,
+      "days_to_liquidate_10m": 1836.33145
+    },
+    {
+      "stock_code": "SGL",
+      "stock_name": "Standard Group Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 1125.0,
+      "close_price": 5.5,
+      "zeros_share_20d": 0.05,
+      "volume_zscore_60d": 0.0,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 6187.5,
+      "days_to_liquidate_1m": 808.080808,
+      "days_to_liquidate_5m": 4040.40404,
+      "days_to_liquidate_10m": 8080.808081
+    },
+    {
+      "stock_code": "PORT",
+      "stock_name": "East African Portland Cement Ltd",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 5220.0,
+      "close_price": 31.9,
+      "zeros_share_20d": 0.05,
+      "volume_zscore_60d": -0.524002,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 166518.0,
+      "days_to_liquidate_1m": 30.026784,
+      "days_to_liquidate_5m": 150.133919,
+      "days_to_liquidate_10m": 300.267839
+    },
+    {
+      "stock_code": "SCOM",
+      "stock_name": "Safaricom Plc",
+      "sector": "Telecommunication",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 6574945.0,
+      "close_price": 16.75,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.544714,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 110130328.75,
+      "days_to_liquidate_1m": 0.045401,
+      "days_to_liquidate_5m": 0.227004,
+      "days_to_liquidate_10m": 0.454008
+    },
+    {
+      "stock_code": "ABSA",
+      "stock_name": "ABSA Bank Kenya Plc",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 127025.0,
+      "close_price": 15.3,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 0.12217,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 1943482.5,
+      "days_to_liquidate_1m": 2.572701,
+      "days_to_liquidate_5m": 12.863507,
+      "days_to_liquidate_10m": 25.727013
+    },
+    {
+      "stock_code": "NCBA",
+      "stock_name": "NCBA Group Plc",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 40380.0,
+      "close_price": 44.05,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 0.551417,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 1778739.0,
+      "days_to_liquidate_1m": 2.81098,
+      "days_to_liquidate_5m": 14.054901,
+      "days_to_liquidate_10m": 28.109801
+    },
+    {
+      "stock_code": "NMG",
+      "stock_name": "Nation Media Group Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 18995.0,
+      "close_price": 14.1,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 0.089391,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 267829.5,
+      "days_to_liquidate_1m": 18.668593,
+      "days_to_liquidate_5m": 93.342966,
+      "days_to_liquidate_10m": 186.685933
+    },
+    {
+      "stock_code": "NSE",
+      "stock_name": "Nairobi Securities Exchange Plc",
+      "sector": "Investment Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 260360.0,
+      "close_price": 5.98,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 0.001199,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 1556952.8,
+      "days_to_liquidate_1m": 3.211401,
+      "days_to_liquidate_5m": 16.057006,
+      "days_to_liquidate_10m": 32.114011
+    },
+    {
+      "stock_code": "SASN",
+      "stock_name": "Sasini Plc",
+      "sector": "Agricultural",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 12270.0,
+      "close_price": 16.75,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.208786,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 205522.5,
+      "days_to_liquidate_1m": 24.328237,
+      "days_to_liquidate_5m": 121.641183,
+      "days_to_liquidate_10m": 243.282366
+    },
+    {
+      "stock_code": "SBIC",
+      "stock_name": "Stanbic Holdings Plc",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 10005.0,
+      "close_price": 129.0,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.19253,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 1290645.0,
+      "days_to_liquidate_1m": 3.874032,
+      "days_to_liquidate_5m": 19.37016,
+      "days_to_liquidate_10m": 38.74032
+    },
+    {
+      "stock_code": "SCAN",
+      "stock_name": "WPP ScanGroup Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 23050.0,
+      "close_price": 2.51,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.429916,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 57855.5,
+      "days_to_liquidate_1m": 86.422207,
+      "days_to_liquidate_5m": 432.111035,
+      "days_to_liquidate_10m": 864.222071
+    },
+    {
+      "stock_code": "SCBK",
+      "stock_name": "Standard Chartered Bank Kenya Ltd",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 12520.0,
+      "close_price": 232.0,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.376476,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 2904640.0,
+      "days_to_liquidate_1m": 1.721384,
+      "days_to_liquidate_5m": 8.606919,
+      "days_to_liquidate_10m": 17.213837
+    },
+    {
+      "stock_code": "UMME",
+      "stock_name": "Umeme Ltd",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 44755.0,
+      "close_price": 16.0,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 0.761801,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 716080.0,
+      "days_to_liquidate_1m": 6.98246,
+      "days_to_liquidate_5m": 34.9123,
+      "days_to_liquidate_10m": 69.824601
+    },
+    {
+      "stock_code": "UCHM",
+      "stock_name": "Uchumi Supermarket Plc",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 227770.0,
+      "close_price": 0.19,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.207389,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 43276.3,
+      "days_to_liquidate_1m": 115.536679,
+      "days_to_liquidate_5m": 577.683397,
+      "days_to_liquidate_10m": 1155.366794
+    },
+    {
+      "stock_code": "TPSE",
+      "stock_name": "TPS Eastern Africa (Serena) Ltd",
+      "sector": "Commercial and Services",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 2790.0,
+      "close_price": 12.7,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.008965,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 35433.0,
+      "days_to_liquidate_1m": 141.111393,
+      "days_to_liquidate_5m": 705.556967,
+      "days_to_liquidate_10m": 1411.113933
+    },
+    {
+      "stock_code": "TCL",
+      "stock_name": "Trans-Century Plc",
+      "sector": "Investment",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 164305.0,
+      "close_price": 0.37,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 3.027402,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 60792.85,
+      "days_to_liquidate_1m": 82.246514,
+      "days_to_liquidate_5m": 411.232571,
+      "days_to_liquidate_10m": 822.465142
+    },
+    {
+      "stock_code": "COOP",
+      "stock_name": "Co-operative Bank of Kenya Ltd",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 390635.0,
+      "close_price": 14.1,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.198127,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 5507953.5,
+      "days_to_liquidate_1m": 0.907778,
+      "days_to_liquidate_5m": 4.538891,
+      "days_to_liquidate_10m": 9.077782
+    },
+    {
+      "stock_code": "HAFR",
+      "stock_name": "Home Afrika Ltd",
+      "sector": "Investment",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 143700.0,
+      "close_price": 0.33,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 0.172608,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 47421.0,
+      "days_to_liquidate_1m": 105.438519,
+      "days_to_liquidate_5m": 527.192594,
+      "days_to_liquidate_10m": 1054.385188
+    },
+    {
+      "stock_code": "BAT",
+      "stock_name": "British American Tobacco Kenya Plc",
+      "sector": "Manufacturing and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 7990.0,
+      "close_price": 356.75,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.217235,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 2850432.5,
+      "days_to_liquidate_1m": 1.75412,
+      "days_to_liquidate_5m": 8.770599,
+      "days_to_liquidate_10m": 17.541198
+    },
+    {
+      "stock_code": "HFCK",
+      "stock_name": "HF Group Ltd",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 239395.0,
+      "close_price": 4.41,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 5.766545,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 1055731.95,
+      "days_to_liquidate_1m": 4.736051,
+      "days_to_liquidate_5m": 23.680253,
+      "days_to_liquidate_10m": 47.360507
+    },
+    {
+      "stock_code": "IMH",
+      "stock_name": "I & M Holdings Plc",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 168095.0,
+      "close_price": 28.1,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 0.029313,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 4723469.5,
+      "days_to_liquidate_1m": 1.058544,
+      "days_to_liquidate_5m": 5.29272,
+      "days_to_liquidate_10m": 10.585439
+    },
+    {
+      "stock_code": "KCB",
+      "stock_name": "KCB Group Plc",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 1122235.0,
+      "close_price": 38.5,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.391137,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 43206047.5,
+      "days_to_liquidate_1m": 0.115725,
+      "days_to_liquidate_5m": 0.578623,
+      "days_to_liquidate_10m": 1.157245
+    },
+    {
+      "stock_code": "KEGN",
+      "stock_name": "Kenya Electricity Generating Company Plc",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 2081410.0,
+      "close_price": 3.82,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 2.503513,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 7950986.2,
+      "days_to_liquidate_1m": 0.628853,
+      "days_to_liquidate_5m": 3.144264,
+      "days_to_liquidate_10m": 6.288528
+    },
+    {
+      "stock_code": "CIC",
+      "stock_name": "CIC Insurance Group Ltd",
+      "sector": "Insurance",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 69140.0,
+      "close_price": 2.2,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 0.337156,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 152108.0,
+      "days_to_liquidate_1m": 32.871381,
+      "days_to_liquidate_5m": 164.356904,
+      "days_to_liquidate_10m": 328.713809
+    },
+    {
+      "stock_code": "KNRE",
+      "stock_name": "Kenya Re-Insurance Corporation Ltd",
+      "sector": "Insurance",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 3578755.0,
+      "close_price": 1.1,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 5.738888,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 3936630.5,
+      "days_to_liquidate_1m": 1.270122,
+      "days_to_liquidate_5m": 6.350609,
+      "days_to_liquidate_10m": 12.701217
+    },
+    {
+      "stock_code": "KPLC",
+      "stock_name": "Kenya Power and Lighting Company Plc",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 2357235.0,
+      "close_price": 4.56,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 1.871079,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 10748991.6,
+      "days_to_liquidate_1m": 0.46516,
+      "days_to_liquidate_5m": 2.3258,
+      "days_to_liquidate_10m": 4.651599
+    },
+    {
+      "stock_code": "DTK",
+      "stock_name": "Diamond Trust Bank Kenya Ltd",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 78820.0,
+      "close_price": 53.0,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.635784,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 4177460.0,
+      "days_to_liquidate_1m": 1.1969,
+      "days_to_liquidate_5m": 5.984498,
+      "days_to_liquidate_10m": 11.968996
+    },
+    {
+      "stock_code": "CARB",
+      "stock_name": "Carbacid Investments Plc",
+      "sector": "Manufacturing and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 32650.0,
+      "close_price": 21.7,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 1.406889,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 708505.0,
+      "days_to_liquidate_1m": 7.057113,
+      "days_to_liquidate_5m": 35.285566,
+      "days_to_liquidate_10m": 70.571132
+    },
+    {
+      "stock_code": "CABL",
+      "stock_name": "East African Cables Plc",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 30815.0,
+      "close_price": 1.05,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.428429,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 32355.75,
+      "days_to_liquidate_1m": 154.532038,
+      "days_to_liquidate_5m": 772.660192,
+      "days_to_liquidate_10m": 1545.320384
+    },
+    {
+      "stock_code": "FTGH",
+      "stock_name": "Flame Tree Group Holdings Ltd",
+      "sector": "Manufacturing and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 34825.0,
+      "close_price": 1.05,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 0.033741,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 36566.25,
+      "days_to_liquidate_1m": 136.738112,
+      "days_to_liquidate_5m": 683.690562,
+      "days_to_liquidate_10m": 1367.381123
+    },
+    {
+      "stock_code": "BRIT",
+      "stock_name": "Britam Holdings Plc",
+      "sector": "Insurance",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 95165.0,
+      "close_price": 5.54,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": 2.836758,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 527214.1,
+      "days_to_liquidate_1m": 9.483813,
+      "days_to_liquidate_5m": 47.419066,
+      "days_to_liquidate_10m": 94.838131
+    },
+    {
+      "stock_code": "FAHR",
+      "stock_name": "Stanlib Fahari Income-REIT",
+      "sector": "Real Estate Investment Trusts",
+      "trade_date": "2022-05-31T00:00:00.000",
+      "avg_volume_20d": 18115.0,
+      "close_price": 5.56,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.095393,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 100719.4,
+      "days_to_liquidate_1m": 49.642869,
+      "days_to_liquidate_5m": 248.214346,
+      "days_to_liquidate_10m": 496.428692
+    },
+    {
+      "stock_code": "EQTY",
+      "stock_name": "Equity Group Holdings Plc",
+      "sector": "Banking",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 362030.0,
+      "close_price": 47.3,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.510896,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 17124019.0,
+      "days_to_liquidate_1m": 0.291988,
+      "days_to_liquidate_5m": 1.459938,
+      "days_to_liquidate_10m": 2.919875
+    },
+    {
+      "stock_code": "EABL",
+      "stock_name": "East African Breweries Ltd",
+      "sector": "Manufacturing and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 111455.0,
+      "close_price": 183.0,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.37453,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 20396265.0,
+      "days_to_liquidate_1m": 0.245143,
+      "days_to_liquidate_5m": 1.225715,
+      "days_to_liquidate_10m": 2.451429
+    },
+    {
+      "stock_code": "CTUM",
+      "stock_name": "Centum Investment Company Plc",
+      "sector": "Investment",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 82445.0,
+      "close_price": 9.6,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.127954,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 791472.0,
+      "days_to_liquidate_1m": 6.317343,
+      "days_to_liquidate_5m": 31.586714,
+      "days_to_liquidate_10m": 63.173429
+    },
+    {
+      "stock_code": "BAMB",
+      "stock_name": "Bamburi Cement Ltd",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 14785.0,
+      "close_price": 65.75,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.156472,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 972113.75,
+      "days_to_liquidate_1m": 5.143431,
+      "days_to_liquidate_5m": 25.717155,
+      "days_to_liquidate_10m": 51.43431
+    },
+    {
+      "stock_code": "TOTL",
+      "stock_name": "TotalEnergies Marketing Kenya Plc",
+      "sector": "Construction and Allied",
+      "trade_date": "2024-10-31T00:00:00.000",
+      "avg_volume_20d": 3905.0,
+      "close_price": 21.05,
+      "zeros_share_20d": 0.0,
+      "volume_zscore_60d": -0.470514,
+      "trailing_illiquid_5": 0,
+      "avg_kes_value_traded_20d": 82200.25,
+      "days_to_liquidate_1m": 60.827066,
+      "days_to_liquidate_5m": 304.135328,
+      "days_to_liquidate_10m": 608.270656
+    }
+  ],
+  "baseline": {
+    "split_test_start_year": 2023,
+    "cutoff_session_no": 2489,
+    "embargo_days": 5,
+    "train_rows_available": 141620,
+    "full": {
+      "rows_scored": 25418,
+      "base_rate": 0.374341,
+      "persistence": {
+        "pr_auc": 0.721267,
+        "flagged": 9537,
+        "precision": 0.804551,
+        "recall": 0.806411
+      },
+      "zeros_rule": {
+        "threshold": 0.5,
+        "pr_auc": 0.897749,
+        "flagged": 4255,
+        "precision": 0.960047,
+        "recall": 0.429322
+      }
+    },
+    "transition": {
+      "rows_scored": 15881,
+      "base_rate": 0.115988,
+      "persistence": {
+        "pr_auc": 0.115988,
+        "flagged": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "zeros_rule": {
+        "threshold": 0.5,
+        "pr_auc": 0.517413,
+        "flagged": 25,
+        "precision": 0.84,
+        "recall": 0.011401
+      }
+    }
+  },
+  "model": {
+    "split_test_start_year": 2023,
+    "single_split": {
+      "cutoff_session_no": 2489,
+      "embargo_days": 5,
+      "train_rows": 141620,
+      "train_base_rate": 0.34791,
+      "features": [
+        "avg_volume_20d",
+        "volatility_20d",
+        "zeros_share_20d",
+        "volume_zscore_60d"
+      ],
+      "coefficients_standardised": {
+        "avg_volume_20d": -7.509967,
+        "volatility_20d": -0.01824,
+        "zeros_share_20d": 2.750417,
+        "volume_zscore_60d": -0.006961
+      },
+      "full": {
+        "rows_scored": 25418,
+        "base_rate": 0.374341,
+        "pr_auc": 0.914498,
+        "same_flags_as_persistence": {
+          "flagged": 9537,
+          "precision": 0.83412,
+          "recall": 0.836048
+        },
+        "same_flags_as_rule": {
+          "flagged": 4255,
+          "precision": 0.958872,
+          "recall": 0.428797
+        }
+      },
+      "transition": {
+        "rows_scored": 15881,
+        "base_rate": 0.115988,
+        "pr_auc": 0.583708,
+        "same_flags_as_persistence": {
+          "flagged": 0,
+          "precision": 0.0,
+          "recall": 0.0
+        },
+        "same_flags_as_rule": {
+          "flagged": 25,
+          "precision": 0.84,
+          "recall": 0.011401
+        }
+      }
+    },
+    "walkforward_by_year_transition_only": [
+      {
+        "test_year": 2016,
+        "rows_scored": 9656,
+        "base_rate": 0.119511,
+        "model_pr_auc": 0.53731,
+        "rule_pr_auc": 0.477848,
+        "persistence_pr_auc": 0.119511,
+        "rule_flags": 25,
+        "model_same_flags_as_rule": {
+          "flagged": 25,
+          "precision": 0.72,
+          "recall": 0.015598
+        }
+      },
+      {
+        "test_year": 2017,
+        "rows_scored": 9543,
+        "base_rate": 0.11904,
+        "model_pr_auc": 0.481451,
+        "rule_pr_auc": 0.395287,
+        "persistence_pr_auc": 0.11904,
+        "rule_flags": 17,
+        "model_same_flags_as_rule": {
+          "flagged": 17,
+          "precision": 0.882353,
+          "recall": 0.013204
+        }
+      },
+      {
+        "test_year": 2018,
+        "rows_scored": 9864,
+        "base_rate": 0.131184,
+        "model_pr_auc": 0.552475,
+        "rule_pr_auc": 0.485937,
+        "persistence_pr_auc": 0.131184,
+        "rule_flags": 29,
+        "model_same_flags_as_rule": {
+          "flagged": 29,
+          "precision": 0.758621,
+          "recall": 0.017002
+        }
+      },
+      {
+        "test_year": 2019,
+        "rows_scored": 8674,
+        "base_rate": 0.138806,
+        "model_pr_auc": 0.551303,
+        "rule_pr_auc": 0.472511,
+        "persistence_pr_auc": 0.138806,
+        "rule_flags": 21,
+        "model_same_flags_as_rule": {
+          "flagged": 21,
+          "precision": 0.952381,
+          "recall": 0.016611
+        }
+      },
+      {
+        "test_year": 2020,
+        "rows_scored": 8226,
+        "base_rate": 0.128009,
+        "model_pr_auc": 0.554383,
+        "rule_pr_auc": 0.481936,
+        "persistence_pr_auc": 0.128009,
+        "rule_flags": 23,
+        "model_same_flags_as_rule": {
+          "flagged": 23,
+          "precision": 0.782609,
+          "recall": 0.017094
+        }
+      },
+      {
+        "test_year": 2021,
+        "rows_scored": 8979,
+        "base_rate": 0.113598,
+        "model_pr_auc": 0.624801,
+        "rule_pr_auc": 0.549378,
+        "persistence_pr_auc": 0.113598,
+        "rule_flags": 25,
+        "model_same_flags_as_rule": {
+          "flagged": 25,
+          "precision": 0.88,
+          "recall": 0.021569
+        }
+      },
+      {
+        "test_year": 2022,
+        "rows_scored": 8619,
+        "base_rate": 0.122056,
+        "model_pr_auc": 0.521146,
+        "rule_pr_auc": 0.456894,
+        "persistence_pr_auc": 0.122056,
+        "rule_flags": 27,
+        "model_same_flags_as_rule": {
+          "flagged": 27,
+          "precision": 0.888889,
+          "recall": 0.022814
+        }
+      },
+      {
+        "test_year": 2023,
+        "rows_scored": 8518,
+        "base_rate": 0.122564,
+        "model_pr_auc": 0.545189,
+        "rule_pr_auc": 0.475616,
+        "persistence_pr_auc": 0.122564,
+        "rule_flags": 12,
+        "model_same_flags_as_rule": {
+          "flagged": 12,
+          "precision": 0.75,
+          "recall": 0.008621
+        }
+      },
+      {
+        "test_year": 2024,
+        "rows_scored": 7363,
+        "base_rate": 0.10838,
+        "model_pr_auc": 0.632081,
+        "rule_pr_auc": 0.574316,
+        "persistence_pr_auc": 0.10838,
+        "rule_flags": 13,
+        "model_same_flags_as_rule": {
+          "flagged": 13,
+          "precision": 0.923077,
+          "recall": 0.015038
+        }
+      }
+    ]
+  }
+}

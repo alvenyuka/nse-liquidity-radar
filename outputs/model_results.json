@@ -1,0 +1,179 @@
+{
+  "split_test_start_year": 2023,
+  "single_split": {
+    "cutoff_session_no": 2489,
+    "embargo_days": 5,
+    "train_rows": 141620,
+    "train_base_rate": 0.34791,
+    "features": [
+      "avg_volume_20d",
+      "volatility_20d",
+      "zeros_share_20d",
+      "volume_zscore_60d"
+    ],
+    "coefficients_standardised": {
+      "avg_volume_20d": -7.509967,
+      "volatility_20d": -0.01824,
+      "zeros_share_20d": 2.750417,
+      "volume_zscore_60d": -0.006961
+    },
+    "full": {
+      "rows_scored": 25418,
+      "base_rate": 0.374341,
+      "pr_auc": 0.914498,
+      "same_flags_as_persistence": {
+        "flagged": 9537,
+        "precision": 0.83412,
+        "recall": 0.836048
+      },
+      "same_flags_as_rule": {
+        "flagged": 4255,
+        "precision": 0.958872,
+        "recall": 0.428797
+      }
+    },
+    "transition": {
+      "rows_scored": 15881,
+      "base_rate": 0.115988,
+      "pr_auc": 0.583708,
+      "same_flags_as_persistence": {
+        "flagged": 0,
+        "precision": 0.0,
+        "recall": 0.0
+      },
+      "same_flags_as_rule": {
+        "flagged": 25,
+        "precision": 0.84,
+        "recall": 0.011401
+      }
+    }
+  },
+  "walkforward_by_year_transition_only": [
+    {
+      "test_year": 2016,
+      "rows_scored": 9656,
+      "base_rate": 0.119511,
+      "model_pr_auc": 0.53731,
+      "rule_pr_auc": 0.477848,
+      "persistence_pr_auc": 0.119511,
+      "rule_flags": 25,
+      "model_same_flags_as_rule": {
+        "flagged": 25,
+        "precision": 0.72,
+        "recall": 0.015598
+      }
+    },
+    {
+      "test_year": 2017,
+      "rows_scored": 9543,
+      "base_rate": 0.11904,
+      "model_pr_auc": 0.481451,
+      "rule_pr_auc": 0.395287,
+      "persistence_pr_auc": 0.11904,
+      "rule_flags": 17,
+      "model_same_flags_as_rule": {
+        "flagged": 17,
+        "precision": 0.882353,
+        "recall": 0.013204
+      }
+    },
+    {
+      "test_year": 2018,
+      "rows_scored": 9864,
+      "base_rate": 0.131184,
+      "model_pr_auc": 0.552475,
+      "rule_pr_auc": 0.485937,
+      "persistence_pr_auc": 0.131184,
+      "rule_flags": 29,
+      "model_same_flags_as_rule": {
+        "flagged": 29,
+        "precision": 0.758621,
+        "recall": 0.017002
+      }
+    },
+    {
+      "test_year": 2019,
+      "rows_scored": 8674,
+      "base_rate": 0.138806,
+      "model_pr_auc": 0.551303,
+      "rule_pr_auc": 0.472511,
+      "persistence_pr_auc": 0.138806,
+      "rule_flags": 21,
+      "model_same_flags_as_rule": {
+        "flagged": 21,
+        "precision": 0.952381,
+        "recall": 0.016611
+      }
+    },
+    {
+      "test_year": 2020,
+      "rows_scored": 8226,
+      "base_rate": 0.128009,
+      "model_pr_auc": 0.554383,
+      "rule_pr_auc": 0.481936,
+      "persistence_pr_auc": 0.128009,
+      "rule_flags": 23,
+      "model_same_flags_as_rule": {
+        "flagged": 23,
+        "precision": 0.782609,
+        "recall": 0.017094
+      }
+    },
+    {
+      "test_year": 2021,
+      "rows_scored": 8979,
+      "base_rate": 0.113598,
+      "model_pr_auc": 0.624801,
+      "rule_pr_auc": 0.549378,
+      "persistence_pr_auc": 0.113598,
+      "rule_flags": 25,
+      "model_same_flags_as_rule": {
+        "flagged": 25,
+        "precision": 0.88,
+        "recall": 0.021569
+      }
+    },
+    {
+      "test_year": 2022,
+      "rows_scored": 8619,
+      "base_rate": 0.122056,
+      "model_pr_auc": 0.521146,
+      "rule_pr_auc": 0.456894,
+      "persistence_pr_auc": 0.122056,
+      "rule_flags": 27,
+      "model_same_flags_as_rule": {
+        "flagged": 27,
+        "precision": 0.888889,
+        "recall": 0.022814
+      }
+    },
+    {
+      "test_year": 2023,
+      "rows_scored": 8518,
+      "base_rate": 0.122564,
+      "model_pr_auc": 0.545189,
+      "rule_pr_auc": 0.475616,
+      "persistence_pr_auc": 0.122564,
+      "rule_flags": 12,
+      "model_same_flags_as_rule": {
+        "flagged": 12,
+        "precision": 0.75,
+        "recall": 0.008621
+      }
+    },
+    {
+      "test_year": 2024,
+      "rows_scored": 7363,
+      "base_rate": 0.10838,
+      "model_pr_auc": 0.632081,
+      "rule_pr_auc": 0.574316,
+      "persistence_pr_auc": 0.10838,
+      "rule_flags": 13,
+      "model_same_flags_as_rule": {
+        "flagged": 13,
+        "precision": 0.923077,
+        "recall": 0.015038
+      }
+    }
+  ]
+}
