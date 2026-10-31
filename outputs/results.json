@@ -156,7 +156,7 @@
       "rows_in": 201524,
       "rows_out": 201524,
       "rows_removed": 0,
-      "note": "0 of 126054 comparable rows differ by more than 0.5 points after allowing for Change%'s unsigned magnitude (kept either way)"
+      "note": "naive signed comparison: 59413 of 126054 rows differ by more than 0.5 points; 0 of 126054 differ once Change%'s unsigned magnitude is allowed for (kept either way)"
     },
     {
       "table": "prices",
@@ -239,11 +239,11 @@
       "stock_codes": 8
     },
     {
-      "sector": "Insurance",
+      "sector": "Agricultural",
       "stock_codes": 6
     },
     {
-      "sector": "Agricultural",
+      "sector": "Insurance",
       "stock_codes": 6
     },
     {
@@ -255,19 +255,19 @@
       "stock_codes": 3
     },
     {
-      "sector": "Real Estate Investment Trusts",
-      "stock_codes": 1
-    },
-    {
-      "sector": "Energy and Petroleum",
-      "stock_codes": 1
-    },
-    {
       "sector": "Automobiles and Accessories",
       "stock_codes": 1
     },
     {
+      "sector": "Real Estate Investment Trusts",
+      "stock_codes": 1
+    },
+    {
       "sector": "Investment Services",
+      "stock_codes": 1
+    },
+    {
+      "sector": "Energy and Petroleum",
       "stock_codes": 1
     }
   ],

@@ -76,13 +76,19 @@ def check_reported_change_matches_computed(table):
     Checked by hand first (73rb78pmzw/NSE_data_all_stocks_2013.csv, rows with both columns
     present): the source writes Change% as an unsigned magnitude -- "6.25%" on a day the price
     fell 6.25%, same as a day it rose 6.25% -- while Change and the prices keep their sign. So
-    the comparison here is against the computed percentage's absolute value, not its sign."""
+    the comparison here is against the computed percentage's absolute value, not its sign. The
+    naive signed comparison is logged too, as the measurement that first surfaced the pattern."""
     has_both = table["previous_price"].notna() & table["change_pct_reported"].notna() & (table["previous_price"] != 0)
     computed_pct = (table.loc[has_both, "close_price"] / table.loc[has_both, "previous_price"] - 1) * 100
-    difference = (computed_pct.abs() - table.loc[has_both, "change_pct_reported"]).abs()
-    mismatched = int((difference > 0.5).sum())
+    reported = table.loc[has_both, "change_pct_reported"]
+    signed_difference = (computed_pct - reported).abs()
+    naive_mismatched = int((signed_difference > 0.5).sum())
+    unsigned_difference = (computed_pct.abs() - reported).abs()
+    mismatched = int((unsigned_difference > 0.5).sum())
     log_rule(TABLE, "check_reported_change_matches_computed", len(table), len(table),
-             note=f"{mismatched} of {int(has_both.sum())} comparable rows differ by more than 0.5 points after allowing for Change%'s unsigned magnitude (kept either way)")
+             note=(f"naive signed comparison: {naive_mismatched} of {int(has_both.sum())} rows differ by more "
+                   f"than 0.5 points; {mismatched} of {int(has_both.sum())} differ once Change%'s unsigned "
+                   "magnitude is allowed for (kept either way)"))
     return table
 
 
