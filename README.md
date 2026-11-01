@@ -35,24 +35,43 @@ turn within 5 sessions?
 | Method | PR-AUC, full population | PR-AUC, transition population (not already illiquid) |
 |---|---|---|
 | Persistence (trailing 5 sessions) | 0.721 | 0.116 *(cannot flag anything by definition)* |
-| Rule: untraded ≥50% of last 20 sessions | 0.898 | 0.517 |
-| Logistic regression (4 SQL-built features) | **0.914** | **0.584** |
+| Rule: ranked by `zeros_share_20d` alone | 0.898 | 0.517 |
+| Logistic regression (4 SQL-built features) | 0.914 | 0.584 |
+| Challenger: HistGradientBoostingClassifier (same 4 features, same split) | 0.916 | 0.594 |
 
 *Test period: 2023-2024, with a 5-session embargo before the split so no training row's
 forward label reaches into the test period. 25,418 rows scored (full), 15,881 of those are
-the transition population. Base rates: 37.4% (full), 11.6% (transition). Source:
-`outputs/results.json` → `baseline`, `model.single_split`.*
+the transition population, the same rows for both models. Base rates: 37.4% (full), 11.6%
+(transition). The rule's PR-AUC ranks the raw `zeros_share_20d` value; the ≥50%-untraded
+cutoff (`RULE_ZEROS_SHARE_THRESHOLD`) only decides the flag count used in the
+precision/recall figures below, not this PR-AUC. Source: `outputs/results.json` →
+`baseline`, `model.single_split`, `challenger.single_split`.*
+
+The challenger is a second model, scored exactly the same way as the logistic regression:
+same population, same single split, same 9-year walk-forward, same flag-matching rules. The
+only difference is the model itself (`HistGradientBoostingClassifier`, scikit-learn, already
+a dependency so no new install, `random_state=42`, no hyperparameter search). On the
+single-split headline it edges the logistic regression, 0.5945 against 0.5837 PR-AUC on the
+transition population. That edge does not hold up across years: on the walk-forward table
+below, the challenger wins 4 of the 9 test years (2018, 2021, 2023, 2024) and the logistic
+regression wins the other 5 (2016, 2017, 2019, 2020, 2022). There is no consistent winner
+between the two models, only a marginal single-split edge for the challenger. Both beat both
+baselines (persistence and the rule) in every one of the 9 years.
 
 **Where the model actually adds value, and where it doesn't.** At the rule's own flag count
-(25 rows in 2023-2024), the model's top-ranked rows are identical to the rule's — same
-precision (84%), same recall (1.1%). The model's higher PR-AUC comes entirely from ranking
-better *below* that cutoff, not from beating the rule at the operating point a desk would
-use today. On the transition population, the model's ranking also beats the rule's **in
-every one of 9 overlapping test years**, 2016 through 2024, refit on an expanding window
-each time — a stability check across years of the same pair of scorers, not nine
-independent replications, but still not one lucky split:
+(25 rows in 2023-2024), the logistic regression's top-ranked rows are identical to the
+rule's, same precision (84%), same recall (1.1%). The logistic regression's higher PR-AUC
+comes entirely from ranking better *below* that cutoff, not from beating the rule at the
+operating point a desk would use today. The challenger does better at this same cutoff: its
+top 25 rows differ from the rule's, catching 23 of 25 correctly (92% precision) against 21
+of 25 (84%) for both the rule and the logistic regression. On the transition population more
+broadly, both models' rankings beat the rule's **in every one of 9 overlapping test years**,
+2016 through 2024, refit on an expanding window each time, a stability check across years of
+the same pair of scorers, not nine independent replications, but still not one lucky split
+(the same caveat applies to the 4-against-5 tally above: overlapping expanding windows of
+the same market, not independent trials):
 
-![Walk-forward PR-AUC by year](figures/walkforward_chart.png)
+![Walk-forward PR-AUC by year, both models vs. rule vs. persistence](figures/walkforward_chart.png)
 
 The quintile chart below (computed on **train years only**, before 2023 — in-sample, shown
 as a feature-selection check, not held-out validation; the walk-forward chart above is the
@@ -64,13 +83,38 @@ The logistic regression's standardised coefficients are `avg_volume_20d` -7.51,
 `zeros_share_20d` +2.75, `volatility_20d` -0.018, `volume_zscore_60d` -0.007 — the first two
 features carry essentially all of the weight, the last two add almost nothing. Reading
 `avg_volume_20d`'s larger magnitude as "the more important feature" would be a mistake,
-though: the two are only weakly correlated (-0.17 on train years, checked directly), but
+though: the two are only weakly correlated (-0.16 on train years — computed by
+`model/train_model.py` and stored in `outputs/model_results.json` →
+`train_years_feature_correlation_avg_volume_zeros_share`), but
 `avg_volume_20d` is heavily right-skewed (median 18,325, 99th percentile 8.56 million)
 while `zeros_share_20d` is bounded to [0, 1], and a standardised coefficient on a
-heavy-tailed feature can be inflated by that skew relative to a bounded one. Which of the
-two actually drives more of the separation shown in the quintile chart is left as an open
-question, not resolved here. A simpler two-feature model would likely perform about as
-well either way — also left open.
+heavy-tailed feature can be inflated by that skew relative to a bounded one.
+
+Permutation importance settles which of the two actually drives more of the separation
+shown in the quintile chart above: shuffle one raw feature at a time, holding the rest
+fixed, and measure how much the transition test set's PR-AUC drops, a scale-invariant
+measure unlike a standardised coefficient, run for both models
+(`sklearn.inspection.permutation_importance`, `scoring="average_precision"`, `n_repeats=20`,
+`random_state=42`):
+
+![Permutation importance, both models, transition test set](figures/permutation_chart.png)
+
+`zeros_share_20d`'s drop is the larger one in both models: 0.3658 against `avg_volume_20d`'s
+0.1085 for the logistic regression (3.4x), and 0.3343 against 0.1228 for the challenger
+(2.7x). `zeros_share_20d` is the feature that actually drives the separation, despite
+`avg_volume_20d`'s larger standardised logistic-regression coefficient, which is a scale
+artifact of the skew described above, not a sign of greater importance. `volatility_20d`
+and `volume_zscore_60d` are both near zero in both models; the logistic regression's
+volatility drop is even slightly negative, consistent with contributing nothing.
+
+One caveat on reading these drops: `avg_volume_20d` and `zeros_share_20d` are weakly
+correlated (-0.16 on train years, computed and sourced above). Each feature's drop is
+measured with the other held fixed at its real, correlated value, so shuffling one in
+isolation can occasionally produce feature combinations unlike the real data, though with a
+correlation this weak the effect is likely small. The two drops are each-held-out-alone
+numbers, not an additive decomposition of total importance. A simpler two-feature model
+(`avg_volume_20d` and `zeros_share_20d` only) would likely perform about as well as the
+four-feature version, not tested here.
 
 ## How I built it
 
@@ -159,6 +203,10 @@ other data-engineering project), which pulls from a live API on a monthly schedu
   static and would mostly memorise which names are already known to be thin rather than
   generalise.
 - The standardised coefficients describe association within this sample, not a causal claim.
+- The challenger (`HistGradientBoostingClassifier`) runs on scikit-learn's defaults,
+  `random_state=42`, no hyperparameter search. The walk-forward result (no consistent winner
+  against the logistic regression) describes this specific baseline challenger, not gradient
+  boosting in general; a tuned version might do better or worse.
 - The "days to exit" column on the results page is an illustrative 20%-participation
   execution rule, not a market-impact model.
 - Kenya Power preference shares (`KPLC-P4`, `KPLC-P7`) are kept as separate listed
@@ -168,8 +216,8 @@ other data-engineering project), which pulls from a live API on a monthly schedu
 
 ```bash
 pip install -r requirements.txt
-py -3 run_all.py            # every stage, in order, ~25s with cached downloads
-py -3 -m pytest -q          # 21 hermetic tests, no live download needed
+py -3 run_all.py            # every stage, in order, ~100s with cached downloads
+py -3 -m pytest -q          # 22 hermetic tests, no live download needed
 py -3 checks/run_checks.py  # the 8 SQL correctness checks on their own
 ```
 
@@ -186,10 +234,12 @@ sql/         01-05 numbered .sql,   sessions, dense grid, features, labels, mart
              template.py            template.py substitutes settings.py's constants into the .sql files' {{TOKENS}}
 checks/      01-08 numbered .sql    each one a query that must return zero rows
 baseline/    rule_of_thumb.py       persistence and a fixed zeros_share_20d rule, scored on the test period
-model/       train_model.py         logistic regression, single split + walk-forward by year
+model/       train_model.py         logistic regression, single split + walk-forward by year,
+                                    permutation importance for both models
+             train_challenger.py    HistGradientBoostingClassifier challenger, scored the same way
 report/      make_results.py, make_figures.py, rounding.py
 site/        build_page.py          builds site/index.html from outputs/results.json
-tests/       21 hermetic pytest tests, including the hand-built label-logic cross-check
+tests/       22 hermetic pytest tests, including the hand-built label-logic cross-check
 settings.py  every constant (window sizes, thresholds, split year) in one place
 run_all.py   runs every stage above in order
 ```

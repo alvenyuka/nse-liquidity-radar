@@ -20,6 +20,15 @@ A second run below walks forward one year at a time (WALKFORWARD_FIRST_TEST_YEAR
 WALKFORWARD_LAST_TEST_YEAR), refitting the model on an expanding window each time, scored
 only on the transition population -- the single 2023-2024 split is one market regime; the
 walk-forward table is the real evidence of whether the model holds up across years.
+
+The logistic regression's own coefficients are standardised but not comparable across
+features: avg_volume_20d is heavy-tailed, zeros_share_20d is bounded [0, 1], so a standard
+deviation means something different for each. permutation_importance_by_feature below
+answers the same "which feature actually drives the separation" question in a way that is
+scale-invariant -- it shuffles one raw feature at a time and reports how much PR-AUC drops,
+which is comparable across features regardless of their original scale. run_single_split and
+run_walkforward also take a build_model_fn, so model/train_challenger.py can reuse this same
+split and scoring logic with a different model.
 """
 import json
 import sys
@@ -28,8 +37,10 @@ from pathlib import Path
 import duckdb
 import numpy as np
 import pandas as pd
+from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
@@ -67,17 +78,40 @@ def load_population():
     return population
 
 
-def fit_model(train_rows):
-    scaler = StandardScaler()
-    x_train = scaler.fit_transform(train_rows[FEATURE_COLUMNS])
-    model = LogisticRegression(max_iter=1000)
-    model.fit(x_train, train_rows["is_illiquid_next_5d"])
-    return scaler, model
+def build_model():
+    """An unfitted scaler+logistic-regression pipeline. Bundled into one pipeline (rather
+    than returned as a separate scaler and model) so permutation_importance can call it
+    directly on the raw, unscaled feature columns -- it does its own scaling internally,
+    exactly as it will on new data."""
+    return Pipeline([("scaler", StandardScaler()), ("model", LogisticRegression(max_iter=1000))])
 
 
-def predict_probability(scaler, model, rows):
-    x_scaled = scaler.transform(rows[FEATURE_COLUMNS])
-    return model.predict_proba(x_scaled)[:, 1]
+def predict_probability(model, rows):
+    return model.predict_proba(rows[FEATURE_COLUMNS])[:, 1]
+
+
+def logistic_regression_diagnostics(model):
+    """Standardised coefficients from the fitted pipeline's logistic regression step -- kept
+    for continuity with earlier runs. Not comparable across features (see module docstring);
+    permutation_importance_by_feature below is scale-invariant, so it is comparable."""
+    coefficients = {}
+    for name, value in zip(FEATURE_COLUMNS, model.named_steps["model"].coef_[0]):
+        coefficients[name] = float(value)
+    return {"coefficients_standardised": coefficients}
+
+
+def permutation_importance_by_feature(model, transition_test):
+    """Mean drop in transition-set PR-AUC when one raw feature's values are shuffled, holding
+    the rest fixed -- scale-invariant, so it can be compared across avg_volume_20d (heavy-
+    tailed) and zeros_share_20d (bounded [0, 1]) directly."""
+    outcome = permutation_importance(
+        model, transition_test[FEATURE_COLUMNS], transition_test["is_illiquid_next_5d"],
+        scoring="average_precision", n_repeats=20, random_state=42,
+    )
+    importances = {}
+    for name, value in zip(FEATURE_COLUMNS, outcome.importances_mean):
+        importances[name] = float(value)
+    return importances
 
 
 def flag_top_n(probability, n):
@@ -112,9 +146,11 @@ def score_population(test_rows, probability):
     }
 
 
-def run_single_split(population):
+def run_single_split(population, build_model_fn=build_model, extra_diagnostics_fn=logistic_regression_diagnostics):
     """The headline split: train on everything before the embargo, test on SPLIT_TEST_START_YEAR
-    onward."""
+    onward. build_model_fn and extra_diagnostics_fn let model/train_challenger.py reuse this same
+    split and scoring logic for a different model -- only the model-fitting step and its own
+    diagnostics differ."""
     test_rows_all_years = population.loc[population["trade_year"] >= SPLIT_TEST_START_YEAR]
     cutoff_session = int(test_rows_all_years["session_no"].min())
     embargo_end = cutoff_session - EMBARGO_DAYS - 1
@@ -122,28 +158,28 @@ def run_single_split(population):
     train = population.loc[population["session_no"] <= embargo_end]
     test = population.loc[population["session_no"] >= cutoff_session]
 
-    scaler, model = fit_model(train)
-    test_probability = predict_probability(scaler, model, test)
+    model = build_model_fn()
+    model.fit(train[FEATURE_COLUMNS], train["is_illiquid_next_5d"])
+    test_probability = predict_probability(model, test)
     transition_test = test.loc[test["currently_liquid"] == 1]
     transition_probability = test_probability[test["currently_liquid"].values == 1]
 
-    coefficients = {}
-    for name, value in zip(FEATURE_COLUMNS, model.coef_[0]):
-        coefficients[name] = float(value)
-
-    return {
+    result = {
         "cutoff_session_no": cutoff_session,
         "embargo_days": EMBARGO_DAYS,
         "train_rows": int(len(train)),
         "train_base_rate": float(train["is_illiquid_next_5d"].mean()),
         "features": FEATURE_COLUMNS,
-        "coefficients_standardised": coefficients,
-        "full": score_population(test, test_probability),
-        "transition": score_population(transition_test, transition_probability),
     }
+    if extra_diagnostics_fn is not None:
+        result.update(extra_diagnostics_fn(model))
+    result["permutation_importance_pr_auc_drop"] = permutation_importance_by_feature(model, transition_test)
+    result["full"] = score_population(test, test_probability)
+    result["transition"] = score_population(transition_test, transition_probability)
+    return result
 
 
-def run_walkforward(population):
+def run_walkforward(population, build_model_fn=build_model):
     """One row per test year: train on every session strictly before that year (minus the
     embargo), test on that year alone, scored on the transition population only."""
     rows = []
@@ -161,8 +197,9 @@ def run_walkforward(population):
         if len(transition_test) == 0:
             continue
 
-        scaler, model = fit_model(train)
-        probability = predict_probability(scaler, model, transition_test)
+        model = build_model_fn()
+        model.fit(train[FEATURE_COLUMNS], train["is_illiquid_next_5d"])
+        probability = predict_probability(model, transition_test)
         persistence_count = int((transition_test["trailing_illiquid_5"] == 1).sum())  # always 0
         rule_count = int((transition_test["zeros_share_20d"] >= RULE_ZEROS_SHARE_THRESHOLD).sum())
         actual = transition_test["is_illiquid_next_5d"]
@@ -180,12 +217,22 @@ def run_walkforward(population):
     return rows
 
 
+def train_years_feature_correlation(population):
+    """Pearson correlation between avg_volume_20d and zeros_share_20d on train years only
+    (before SPLIT_TEST_START_YEAR) -- backs the README/METHODOLOGY claim that the two
+    features carrying most of the logistic regression's weight are only weakly correlated,
+    so neither coefficient is just restating the other."""
+    train_rows = population.loc[population["trade_year"] < SPLIT_TEST_START_YEAR]
+    return float(train_rows["avg_volume_20d"].corr(train_rows["zeros_share_20d"]))
+
+
 def main():
     population = load_population()
     results = {
         "split_test_start_year": SPLIT_TEST_START_YEAR,
         "single_split": run_single_split(population),
         "walkforward_by_year_transition_only": run_walkforward(population),
+        "train_years_feature_correlation_avg_volume_zeros_share": train_years_feature_correlation(population),
     }
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)

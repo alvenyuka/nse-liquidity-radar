@@ -18,6 +18,7 @@ STAGES = [
     ("5 checks", "checks/run_checks.py"),
     ("6 baseline", "baseline/rule_of_thumb.py"),
     ("7 model", "model/train_model.py"),
+    ("7b challenger", "model/train_challenger.py"),
     ("8 results", "report/make_results.py"),
     ("9 figures", "report/make_figures.py"),
     ("10 site", "site/build_page.py"),

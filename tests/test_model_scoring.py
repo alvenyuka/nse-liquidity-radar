@@ -2,7 +2,8 @@
 import numpy as np
 import pandas as pd
 
-from train_model import flag_top_n, score_flags
+from settings import FEATURE_COLUMNS
+from train_model import build_model, flag_top_n, permutation_importance_by_feature, score_flags
 
 
 def test_flag_top_n_picks_exactly_n_highest_scores():
@@ -38,3 +39,25 @@ def test_score_flags_handles_no_flags_without_division_error():
     assert result["flagged"] == 0
     assert result["precision"] == 0.0
     assert result["recall"] == 0.0
+
+
+def test_permutation_importance_by_feature_ranks_the_real_signal_highest():
+    # a label that depends only on avg_volume_20d, with the other three features pure noise --
+    # permuting avg_volume_20d should hurt PR-AUC far more than permuting any of the others.
+    rng = np.random.default_rng(0)
+    rows = 400
+    population = pd.DataFrame({
+        "avg_volume_20d": rng.normal(size=rows),
+        "volatility_20d": rng.normal(size=rows),
+        "zeros_share_20d": rng.normal(size=rows),
+        "volume_zscore_60d": rng.normal(size=rows),
+    })
+    population["is_illiquid_next_5d"] = (population["avg_volume_20d"] > 0).astype(int)
+
+    model = build_model()
+    model.fit(population[FEATURE_COLUMNS], population["is_illiquid_next_5d"])
+    importances = permutation_importance_by_feature(model, population)
+
+    assert set(importances.keys()) == set(FEATURE_COLUMNS)
+    for noise_feature in ["volatility_20d", "zeros_share_20d", "volume_zscore_60d"]:
+        assert importances["avg_volume_20d"] > importances[noise_feature]

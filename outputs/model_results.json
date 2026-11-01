@@ -17,6 +17,12 @@
       "zeros_share_20d": 2.750417,
       "volume_zscore_60d": -0.006961
     },
+    "permutation_importance_pr_auc_drop": {
+      "avg_volume_20d": 0.108529,
+      "volatility_20d": -0.001683,
+      "zeros_share_20d": 0.365777,
+      "volume_zscore_60d": 0.001064
+    },
     "full": {
       "rows_scored": 25418,
       "base_rate": 0.374341,
@@ -175,5 +181,6 @@
         "recall": 0.015038
       }
     }
-  ]
+  ],
+  "train_years_feature_correlation_avg_volume_zeros_share": -0.161555
 }

@@ -80,16 +80,22 @@ Cut:
   separates forward risk cleanly on its own. The standardised coefficients
   (`outputs/model_results.json`) show `avg_volume_20d` with the larger magnitude of the
   two, but that feature is heavily right-skewed where `zeros_share_20d` is bounded to
-  [0, 1] -- which of the two actually drives more of the model is an open question, not
-  settled by the coefficients alone (see the README's Results section).
+  [0, 1]. Permutation importance (`outputs/model_results.json`,
+  `outputs/challenger_results.json`, `permutation_importance_by_feature`) settles which one
+  actually drives the model: `zeros_share_20d`'s mean PR-AUC drop is 3.4x `avg_volume_20d`'s
+  for the logistic regression (0.3658 vs 0.1085) and 2.7x for the challenger (0.3343 vs
+  0.1228). `zeros_share_20d` is the real driver in both models; the larger standardised
+  coefficient on `avg_volume_20d` is a scale artifact of its skew, not greater importance
+  (see the README's Results section for the full comparison and its correlation caveat).
 - **Shares-outstanding turnover** — not present in the source data.
 - **12-month High/Low** — present in the source but of unstated construction and redundant
   with the rolling windows already built.
 - **Sector and stock dummies** — see above.
-- **XGBoost, a FastAPI service, Docker, a scheduled-refresh workflow.** None add anything a
-  static page and a plain logistic regression do not already show for a frozen historical
-  archive: no live traffic to serve, no deployment target to containerise, nothing to
-  refresh on a schedule.
+- **A FastAPI service, Docker, a scheduled-refresh workflow.** None add anything a static
+  page does not already show for a frozen historical archive: no live traffic to serve, no
+  deployment target to containerise, nothing to refresh on a schedule. (XGBoost was cut on
+  the same reasoning in the first draft; that call was revisited on 2026-11-01, see
+  "Decisions" below.)
 
 ## Decisions (changed from the first draft, before any code was written)
 
@@ -111,3 +117,17 @@ One more decision made once real data was in hand, not anticipated in the design
 excluding market indices (`^NASI`, `^N20I`, `^FNK25`, …) from the universe, discovered when
 the price-code count came to 77 rather than the expected ~60-64 — described in the README's
 "Problems I hit".
+
+A second revisit, made on 2026-11-01, well after the project was published. The first draft
+cut XGBoost as adding nothing beyond a plain logistic regression for a frozen historical
+archive. That call is now revised, not reversed: a challenger model
+(`HistGradientBoostingClassifier`, scikit-learn, already a dependency so no new install,
+scored exactly the same way as the logistic regression, same population, same single split,
+same walk-forward, same flag-matching rules) was added, together with permutation importance
+for both models. It did add something the earlier draft assumed it would not: it resolved
+the open question the logistic regression's coefficients alone could not settle (see the
+Features section above), and it edges the logistic regression on the single-split headline,
+0.5945 against 0.5837 PR-AUC on the transition population, with no consistent winner across
+the 9-year walk-forward (the challenger wins 4 years, the logistic regression wins 5). A
+FastAPI service, Docker and a scheduled-refresh workflow stay cut for the reasons above: this
+addition is a second scored model inside the existing pipeline, not new infrastructure.

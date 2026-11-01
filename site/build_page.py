@@ -152,6 +152,12 @@ def build_page():
     baseline = r["baseline"]
     model = r["model"]["single_split"]
     walkforward = r["model"]["walkforward_by_year_transition_only"]
+    challenger = r["challenger"]["single_split"]
+    challenger_walkforward_by_year = {}
+    for row in r["challenger"]["walkforward_by_year_transition_only"]:
+        challenger_walkforward_by_year[row["test_year"]] = row["model_pr_auc"]
+    permutation_model = model["permutation_importance_pr_auc_drop"]
+    permutation_challenger = challenger["permutation_importance_pr_auc_drop"]
 
     hero_facts = f"""
 <ul class="facts">
@@ -173,8 +179,9 @@ def build_page():
     # Results: full population vs. the honest transition-only headline
     comparison_rows = [
         ["Persistence (today's regime = tomorrow's)", pct(baseline['full']['base_rate']), pct(baseline['full']['persistence']['pr_auc'], 3), pct(baseline['transition']['base_rate']), pct(baseline['transition']['persistence']['pr_auc'], 3)],
-        [f"Rule: untraded ≥{int(baseline['full']['zeros_rule']['threshold']*100)}% of last 20 sessions", "", pct(baseline['full']['zeros_rule']['pr_auc'], 3), "", pct(baseline['transition']['zeros_rule']['pr_auc'], 3)],
+        ["Rule: ranked by zeros_share_20d alone", "", pct(baseline['full']['zeros_rule']['pr_auc'], 3), "", pct(baseline['transition']['zeros_rule']['pr_auc'], 3)],
         ["Logistic regression (4 SQL-built features)", "", pct(model['full']['pr_auc'], 3), "", pct(model['transition']['pr_auc'], 3)],
+        ["Challenger (gradient-boosted trees, same 4 features)", "", pct(challenger['full']['pr_auc'], 3), "", pct(challenger['transition']['pr_auc'], 3)],
     ]
     comparison_table = table(
         "PR-AUC and base rate, test period 2023-2024 (5-session embargo before the split)",
@@ -182,24 +189,37 @@ def build_page():
         comparison_rows,
     )
     same_as_rule = model['transition']['same_flags_as_rule']
+    challenger_wins = 0
+    model_wins = 0
+    for row in walkforward:
+        if challenger_walkforward_by_year[row["test_year"]] > row["model_pr_auc"]:
+            challenger_wins += 1
+        else:
+            model_wins += 1
+    challenger_same_as_rule = challenger['transition']['same_flags_as_rule']
+    lr_correct = round(same_as_rule['flagged'] * same_as_rule['precision'])
+    challenger_correct = round(challenger_same_as_rule['flagged'] * challenger_same_as_rule['precision'])
+    dominance_ratio = permutation_model['zeros_share_20d'] / permutation_model['avg_volume_20d']
+    challenger_dominance_ratio = permutation_challenger['zeros_share_20d'] / permutation_challenger['avg_volume_20d']
     callout = f"""
-<div class="callout prose"><p><strong>Why "full population" overstates it.</strong> Most of the illiquidity in {pct(label_distribution['base_rate_full'])} of all rows is a stock that was already illiquid staying that way — persistence alone gets {pct(baseline['full']['persistence']['pr_auc'],3)} PR-AUC for free. The question worth answering is the harder one: among the {whole(label_distribution['currently_liquid_rows'])} stock-sessions that were NOT already illiquid, which ones turn within 5 sessions? There, persistence cannot even be defined usefully (it predicts nothing, since by definition these rows are not currently illiquid), the fixed rule gets {num(baseline['transition']['zeros_rule']['pr_auc'])}, and the model gets {num(model['transition']['pr_auc'])} — a real, modest improvement, not a free one.</p><p><strong>Where the model actually adds value.</strong> At the rule's own flag count ({same_as_rule['flagged']} flags), the model's top-ranked rows are the exact same as the rule's — precision {pct(same_as_rule['precision'],0)}, recall {pct(same_as_rule['recall'],1)}, identical. The model's higher PR-AUC comes from ranking better below that cutoff, not from beating the rule at the operating point a desk would actually use today. A lower, better-chosen cutoff is the natural next question, not answered here.</p></div>"""
+<div class="callout prose"><p><strong>Why "full population" overstates it.</strong> Most of the illiquidity in {pct(label_distribution['base_rate_full'])} of all rows is a stock that was already illiquid staying that way — persistence alone gets {pct(baseline['full']['persistence']['pr_auc'],3)} PR-AUC for free. The question worth answering is the harder one: among the {whole(label_distribution['currently_liquid_rows'])} stock-sessions that were NOT already illiquid, which ones turn within 5 sessions? There, persistence cannot even be defined usefully (it predicts nothing, since by definition these rows are not currently illiquid), the fixed rule gets {num(baseline['transition']['zeros_rule']['pr_auc'])}, the logistic regression gets {num(model['transition']['pr_auc'])}, and the challenger gets {num(challenger['transition']['pr_auc'])} — real, modest improvements, not free ones.</p><p><strong>Where the models actually add value.</strong> At the rule's own flag count ({same_as_rule['flagged']} flags), the logistic regression's top-ranked rows are the exact same as the rule's — {lr_correct} of {same_as_rule['flagged']} correct ({pct(same_as_rule['precision'],0)} precision), identical; its higher PR-AUC comes entirely from ranking better *below* that cutoff, not from beating the rule at this operating point. The challenger does better here: its top {challenger_same_as_rule['flagged']} rows differ from the rule's, catching {challenger_correct} of {challenger_same_as_rule['flagged']} correctly ({pct(challenger_same_as_rule['precision'],0)} precision). A lower, better-chosen cutoff is the natural next question, not answered here.</p><p><strong>Two models, no consistent winner.</strong> The challenger edges the logistic regression on the single-split headline above, but across the 9 walk-forward years below the challenger wins {challenger_wins} and the logistic regression wins {model_wins} — not a case for replacing the simpler model. What the two models agree on, by permutation importance (how much transition-set PR-AUC drops when one raw feature is shuffled, scale-invariant unlike a standardised coefficient): zeros_share_20d is the real driver of the separation in both — roughly {dominance_ratio:.1f}&times; avg_volume_20d's effect for the logistic regression, {challenger_dominance_ratio:.1f}&times; for the challenger — avg_volume_20d's larger logistic-regression coefficient was a scale artifact (it is heavy-tailed, zeros_share_20d is bounded [0,1]), not a sign that it matters more.</p></div>"""
 
     walkforward_rows = []
     for row in walkforward:
         walkforward_rows.append([
             row["test_year"], whole(row["rows_scored"]), pct(row["base_rate"]),
             num(row["persistence_pr_auc"]), num(row["rule_pr_auc"]), num(row["model_pr_auc"]),
+            num(challenger_walkforward_by_year[row["test_year"]]),
         ])
     walkforward_table = table(
         "Walk-forward by year, transition population only, expanding training window",
-        ["Test year", "Rows scored", "Base rate", "Persistence PR-AUC", "Rule PR-AUC", "Model PR-AUC"],
+        ["Test year", "Rows scored", "Base rate", "Persistence PR-AUC", "Rule PR-AUC", "LR PR-AUC", "Challenger PR-AUC"],
         walkforward_rows,
     )
 
     results_section = section(
-        "results", "Results", "The model beats the rule every year — modestly",
-        "Not one lucky split: the same model, refit on an expanding window, outperforms the fixed rule's ranking in every one of 9 overlapping test years (a stability check across years of the same pair of scorers, not nine independent replications).",
+        "results", "Results", "Both models beat the rule every year — modestly",
+        "Not one lucky split: the same two models, refit on an expanding window, outperform the fixed rule's ranking in every one of 9 overlapping test years (a stability check across years of the same pair of scorers, not nine independent replications).",
         f'<div class="card">{comparison_table}</div>{callout}<div class="card" style="margin-top:1.25rem">{walkforward_table}</div>',
     )
 
@@ -250,7 +270,7 @@ def build_page():
     method_body = """
 <div class="grid2">
 <div class="card prose"><p><strong>1-2. Ingest and clean.</strong> Four public Mendeley Data archives (one author, one schema, CC BY 4.0), downloaded with no login. Real schema drift handled: column names and even the date format change between the 2013-2021 files and the 2022-2024 files.</p><p><strong>3. Warehouse.</strong> DuckDB, loaded from cleaned parquet.</p><p><strong>4. SQL models.</strong> A dense per-stock session grid first, then window-function features (ROWS BETWEEN, never a date range), then the forward and trailing labels, then the analysis mart. Plain numbered .sql files, no dbt.</p></div>
-<div class="card prose"><p><strong>5. Checks.</strong> 8 SQL checks that must return zero rows: no duplicate sessions, the grid never leaves a stock's own listed life, both labels are NULL in exactly the rows they should be, no negative volume, dates in range, every price code has a sector.</p><p><strong>6-7. Baseline and model.</strong> A naive persistence guess and a fixed rule, then a logistic regression, compared like-for-like by matching flag counts, not by a fixed probability cutoff that a rare label would make meaningless.</p><p><strong>8-10. Report, figures, site.</strong> Every number above traces to <code>outputs/results.json</code>.</p></div>
+<div class="card prose"><p><strong>5. Checks.</strong> 8 SQL checks that must return zero rows: no duplicate sessions, the grid never leaves a stock's own listed life, both labels are NULL in exactly the rows they should be, no negative volume, dates in range, every price code has a sector.</p><p><strong>6-7b. Baseline and two models.</strong> A naive persistence guess and a fixed rule, then a logistic regression and a gradient-boosted-trees challenger, scored exactly the same way and compared like-for-like by matching flag counts, not by a fixed probability cutoff that a rare label would make meaningless.</p><p><strong>8-10. Report, figures, site.</strong> Every number above traces to <code>outputs/results.json</code>.</p></div>
 </div>"""
     method_section = section(
         "method", "How it is built", "One folder per stage, runnable end to end",
@@ -263,7 +283,7 @@ def build_page():
         "Indices (codes starting with ‘^’, e.g. the NSE All-Share Index) are excluded from the universe: an index has no comparable single-instrument trading volume.",
         "Returns are computed from the raw close, which is echoed unchanged on an untraded day (the source repeats the last traded price rather than leaving it blank). That makes 20-day return volatility understate true volatility on the thinnest names — a day with no trade is not really a zero-return day, it is a missing one.",
         "volume_zscore_60d is undefined (not computed) for a stock with zero trading volume for 60 straight sessions — a real state for several names in this market, not a bug.",
-        "The logistic regression's standardised coefficients describe association within this sample, not a causal claim about what drives illiquidity.",
+        "The logistic regression's standardised coefficients describe association within this sample, not a causal claim about what drives illiquidity. Permutation importance (used instead to rank features, since it is scale-invariant) holds each feature's correlation with the others fixed at its real value, so a shuffled feature combination can fall outside the real data; the two features' importance scores are each-held-out-alone numbers, not a decomposition that sums to a total.",
         "Sector is shown for grouping only; it is never a model input, because it is static and would mostly just memorise which names are already known to be thin.",
         "The ‘days to exit’ column on the watchlist is an illustrative execution rule of thumb (20% daily participation), not a market-impact model.",
     ]
@@ -321,7 +341,7 @@ def build_page():
 
 def main():
     page = build_page()
-    print(f"wrote {PAGE_PATH} ({len(page):,} characters)")
+    print(f"wrote {PAGE_PATH.relative_to(PROJECT_DIR)} ({len(page):,} characters)")
 
 
 if __name__ == "__main__":

@@ -120,13 +120,14 @@ def main():
 
     connection.close()
 
-    # 6. The baseline and the model
+    # 6. The baseline, the model and its challenger
     results["baseline"] = json.loads((OUTPUT_DIR / "baseline_results.json").read_text())
     results["model"] = json.loads((OUTPUT_DIR / "model_results.json").read_text())
+    results["challenger"] = json.loads((OUTPUT_DIR / "challenger_results.json").read_text())
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUTPUT_DIR / "results.json").write_text(json.dumps(round_numbers(results), indent=2))
-    print(f"wrote {OUTPUT_DIR / 'results.json'}")
+    print(f"wrote {(OUTPUT_DIR / 'results.json').relative_to(PROJECT_DIR)}")
 
 
 if __name__ == "__main__":

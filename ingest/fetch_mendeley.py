@@ -121,7 +121,7 @@ def main():
 
     manifest_path = RAW_DIR / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2))
-    print(f"\nwrote {manifest_path}")
+    print(f"\nwrote {manifest_path.relative_to(PROJECT_DIR)}")
 
 
 if __name__ == "__main__":
