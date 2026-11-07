@@ -13,7 +13,7 @@ table returns no zero). Both missing-row and explicit-`"-"` mean the same thing 
 project's purpose: nothing changed hands.
 
 This is a fixed, absolute threshold chosen in advance, not a percentile computed over the
-full 2013-2024 sample — a percentile threshold would use 2024 data to label a 2014 row,
+full 2013-2024 sample. A percentile threshold would use 2024 data to label a 2014 row,
 which is exactly the kind of leakage a backtest needs to avoid.
 
 ## The dense per-stock session grid
@@ -24,7 +24,7 @@ Two concrete failure modes this removes:
 
 1. **Calendar gaps stretch a window silently.** `ROWS BETWEEN 1 FOLLOWING AND 5 FOLLOWING`
    on a sparse table "5 sessions" actually spans however many calendar days the next 5
-   *present* rows happen to cover — which can be weeks, if the stock has gaps. On the dense
+   *present* rows happen to cover, which can be weeks if the stock has gaps. On the dense
    grid, 5 rows is always 5 trading sessions.
 2. **Unbounded grids invent history.** Bounding each stock to its own first/last date
    (rather than the full market calendar) matters just as much: without it, a stock
@@ -36,9 +36,9 @@ Two concrete failure modes this removes:
 ## Labels and the leakage guards
 
 - `trailing_illiquid_5`: `MAX(is_untraded)` over the current row and 4 preceding (5
-  sessions including today) — `NULL` on a stock's first 4 sessions. This both is the naive
+  sessions including today). `NULL` on a stock's first 4 sessions. This both is the naive
   persistence baseline's prediction and defines `currently_liquid`.
-- `is_illiquid_next_5d`: `MAX(is_untraded)` over `1 FOLLOWING` to `5 FOLLOWING` — never `0
+- `is_illiquid_next_5d`: `MAX(is_untraded)` over `1 FOLLOWING` to `5 FOLLOWING`, never `0
   FOLLOWING` (today), always the 5 sessions strictly after. `NULL` on a stock's last 5
   sessions, where there is no full 5-session future to check.
 - Both windows are `ROWS BETWEEN`, never `RANGE` or a date self-join, for the same reason as
@@ -56,7 +56,7 @@ A single time split (train before 2023, test 2023-2024) is the headline, with a 
 training, because their forward labels look 1-5 sessions ahead and would otherwise reach
 into the test period. The walk-forward table (`model/train_model.py`,
 `run_walkforward`) repeats this with an expanding window, one extra test year at a time,
-2016 through 2024 — the single split is one market regime (2023-2024: thin NSE turnover,
+2016 through 2024. The single split is one market regime (2023-2024: thin NSE turnover,
 KES depreciation); the walk-forward table is the evidence that the result is not one lucky
 year.
 
@@ -68,7 +68,7 @@ has flagged yet.
 ## Features kept, and features cut
 
 Kept: `avg_volume_20d`, `volatility_20d`, `zeros_share_20d`, `volume_zscore_60d`. All four
-use `ROWS BETWEEN n PRECEDING AND CURRENT ROW` — today's close and volume are known at the
+use `ROWS BETWEEN n PRECEDING AND CURRENT ROW`. Today's close and volume are known at the
 moment this signal would be used (end of trading on day t, acted on at the open of t+1).
 
 Cut:
@@ -87,10 +87,10 @@ Cut:
   0.1228). `zeros_share_20d` is the real driver in both models; the larger standardised
   coefficient on `avg_volume_20d` is a scale artifact of its skew, not greater importance
   (see the README's Results section for the full comparison and its correlation caveat).
-- **Shares-outstanding turnover** — not present in the source data.
-- **12-month High/Low** — present in the source but of unstated construction and redundant
+- **Shares-outstanding turnover**: not present in the source data.
+- **12-month High/Low**: present in the source but of unstated construction and redundant
   with the rolling windows already built.
-- **Sector and stock dummies** — see above.
+- **Sector and stock dummies**: see above.
 - **A FastAPI service, Docker, a scheduled-refresh workflow.** None add anything a static
   page does not already show for a frozen historical archive: no live traffic to serve, no
   deployment target to containerise, nothing to refresh on a schedule. (XGBoost was cut on
@@ -108,14 +108,14 @@ five changed the design:
 2. **Threshold leakage.** An "illiquid" definition based on a percentile over the whole
    sample would use future data to label the past. Fixed with the absolute `volume <= 0 OR
    NULL` threshold above.
-3. **The dense grid**, described above — the single biggest change from the first draft,
+3. **The dense grid**, described above: the single biggest change from the first draft,
    which had assumed a plain per-stock `LAG`/`LEAD` on the raw sparse table.
 4. **The embargo and the walk-forward table**, described above.
 5. **Amihud replaced with `zeros_share_20d`**, described above.
 
 One more decision made once real data was in hand, not anticipated in the design review:
 excluding market indices (`^NASI`, `^N20I`, `^FNK25`, …) from the universe, discovered when
-the price-code count came to 77 rather than the expected ~60-64 — described in the README's
+the price-code count came to 77 rather than the expected ~60-64: described in the README's
 "Problems I hit".
 
 A second revisit, made on 2026-11-01, well after the project was published. The first draft
